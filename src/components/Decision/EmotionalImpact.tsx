@@ -55,7 +55,7 @@ export function EmotionalImpact({ emotion }: EmotionalImpactProps) {
           <h3 className="text-lg font-semibold text-sand-900 dark:text-sand-100">
             Emotional Impact
           </h3>
-          <p className="text-sand-700 dark:text-sand-300">
+          <p className="text-sand-700 dark:text-sand-300 mt-1">
             {emotion.description}
           </p>
         </div>

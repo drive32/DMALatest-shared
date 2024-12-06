@@ -15,6 +15,7 @@ export function Profile() {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (session?.user) {
         setUserId(session.user.id);
         fetchProfile(session.user.id).catch(console.error);

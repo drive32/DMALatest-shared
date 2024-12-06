@@ -56,7 +56,6 @@ export function ProfileForm({ userId, initialData }: ProfileFormProps) {
       if (!userId) {
         throw new Error('User ID is required');
       }
-
       await updateProfile(userId, {
         fullName: data.fullName.trim(),
         gender: data.gender || null,

@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import { getAuthErrorMessage } from '../utils/errorHandling';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 
 interface User {
   id: string;
@@ -131,34 +136,39 @@ export const useAuth = create<AuthState>((set) => ({
 
   signIn: async (email: string, password: string) => {
     try {
-      const { data: { user: authUser }, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+     // Call Supabase signInWithPassword
+    const result = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (signInError) throw signInError;
-      if (!authUser) throw new Error('Invalid credentials');
+    const { data, error } = result;
 
-      // Get profile data
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('fullname')
-        .eq('id', authUser.id)
-        .single();
+    if (error) throw error;
+    if (!data.user) throw new Error('Invalid credentials');
 
-      const user = {
-        id: authUser.id,
-        email: authUser.email || '',
-        fullName: profileData?.fullname || null
-      };
+ // Get profile data
+    const { data: profileData } = await supabase
+                              .from('profiles')
+                              .select('fullname')
+                              .eq('id', data.user.id)
+                              .single();
+    // Save session manually if persistSession is true
+    if (data.session) {
+      await AsyncStorage.setItem('supabase-session', JSON.stringify(data.session));
+    }
+    const user = {
+      id: data.user.id,
+      email: data.user.email || '',
+      fullName: profileData?.fullname || null
+    };
 
-      set({ 
-        user,
-        lastActivity: Date.now(),
-        sessionTimeout: 3600000 // 1 hour
-      });
-
-      return { user, error: null };
+    set({ 
+      user,
+      lastActivity: Date.now(),
+      sessionTimeout: 3600000 // 1 hour
+    });
+    return { user, error: null };
     } catch (error) {
       console.error('Sign in error:', error);
       return { user: null, error: getAuthErrorMessage(error) };
@@ -166,18 +176,26 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
+
     try {
-      // Clear any stored session data
-      localStorage.removeItem('sb-blbfmoddnuoxsezajhwy-auth-token');
-      sessionStorage.clear();
-      
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut({
-        scope: 'global'
+
+      const sessionString = await AsyncStorage.getItem('supabase-session');
+      if (!sessionString) throw new Error('Authentication required');
+      const session = JSON.parse(sessionString);
+
+      const response = await fetch(`${supabaseUrl}/auth/v1/logout`, {
+        method: 'POST',
+        headers: {
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${session?.access_token}`, // Replace with the current access token
+        },
       });
-      
-      if (error) throw error;
-      
+  
+      if (!response.ok) {
+        throw new Error('Failed to log out');
+      }
+
+      await AsyncStorage.removeItem('supabase-session');
       // Clear all state
       set({ 
         user: null,
@@ -186,9 +204,9 @@ export const useAuth = create<AuthState>((set) => ({
       });
       
       return { error: null };
+
     } catch (error) {
-      console.error('Sign out error:', error);
-      return { error: getAuthErrorMessage(error) };
+      throw new Error('Failed to log out');
     }
   }
 }));

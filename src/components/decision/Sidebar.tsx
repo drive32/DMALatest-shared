@@ -13,14 +13,19 @@ export function Sidebar() {
   const { isCollapsed, toggleCollapse } = useSidebarStore();
 
   const handleSignOut = async () => {
+    console.log("step 1 logout");
     try {
       const { error } = await signOut();
+      console.log("step 2 logout");
       if (error) {
+        console.log("step 3 logout");
         toast.error('Failed to sign out');
         return;
       }
       navigate('/');
     } catch (error) {
+      console.log("step 5 logout");
+
       console.error('Error during sign out:', error);
       toast.error('An unexpected error occurred');
     }

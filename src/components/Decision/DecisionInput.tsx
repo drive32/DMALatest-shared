@@ -1,46 +1,23 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader } from 'lucide-react';
+import { Loader, Brain } from 'lucide-react';
 
 interface DecisionInputProps {
-  onDecision: (decision: any) => void;
+  onSubmit: (question: string) => void;
 }
 
-export function DecisionInput({ onDecision }: DecisionInputProps) {
-  const [query, setQuery] = useState('');
+export function DecisionInput({ onSubmit }: DecisionInputProps) {
+  const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim() || isLoading) return;
+    if (!question.trim() || isLoading) return;
 
     setIsLoading(true);
     
-    // Simulated API call
     setTimeout(() => {
-      const decision = {
-        recommendation: "Based on careful analysis of your situation, you should proceed with the decision. The potential benefits outweigh the risks, and there are clear opportunities for growth and development.",
-        pros: [
-          "Strong potential for professional growth",
-          "Aligns with long-term career goals",
-          "Offers competitive financial benefits",
-          "Provides opportunity for skill development",
-          "Includes mentorship opportunities"
-        ],
-        cons: [
-          "Requires significant time investment",
-          "Initial learning curve might be steep",
-          "Some short-term uncertainty",
-          "May require lifestyle adjustments",
-          "Potential stress during transition"
-        ],
-        emotion: {
-          type: "excited",
-          description: "This decision shows excellent potential for positive outcomes and personal growth. The enthusiasm and optimism surrounding this choice suggest it's well-aligned with your aspirations."
-        }
-      };
-
-      onDecision(decision);
+      onSubmit(question);
       setIsLoading(false);
     }, 2000);
   };
@@ -49,35 +26,50 @@ export function DecisionInput({ onDecision }: DecisionInputProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-sand-800 rounded-xl shadow-lg p-6"
+      className="bg-secondary rounded-xl shadow-lg p-6"
     >
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 bg-accent-50 rounded-lg">
+          <Brain className="w-6 h-6 text-accent-600" />
+        </div>
+        <h2 className="text-xl font-display font-bold text-primary">
+          Make a Decision
+        </h2>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <label 
-          htmlFor="decision-query" 
-          className="block text-xl font-semibold text-sand-900 dark:text-sand-100"
-        >
-          What decision do you need help with?
-        </label>
-        <textarea
-          id="decision-query"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full h-32 px-4 py-3 rounded-lg border border-sand-200 dark:border-sand-700 bg-white dark:bg-sand-900 text-sand-900 dark:text-sand-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          placeholder="Describe your decision in detail..."
-        />
+        <div>
+          <label 
+            htmlFor="decision-question" 
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            What decision do you need help with?
+          </label>
+          <textarea
+            id="decision-question"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            className="input-primary w-full h-32 resize-none"
+            placeholder="Describe your decision in detail..."
+          />
+        </div>
+
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={!query.trim() || isLoading}
-            className="px-6 py-2 rounded-lg text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            disabled={!question.trim() || isLoading}
+            className="btn-primary inline-flex items-center justify-center px-6 py-3 shadow-lg hover:shadow-xl"
           >
             {isLoading ? (
               <>
-                <Loader className="w-5 h-5 animate-spin" />
+                <Loader className="w-5 h-5 animate-spin mr-2" />
                 Analyzing...
               </>
             ) : (
-              'Make Decision'
+              <>
+                <Brain className="w-5 h-5 mr-2" />
+                Get AI Recommendation
+              </>
             )}
           </button>
         </div>

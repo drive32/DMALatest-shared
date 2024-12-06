@@ -4,6 +4,11 @@ import { toast } from 'sonner';
 import { Decision } from '../types';
 import { uploadFile } from '../utils/api';
 import { STORAGE_BUCKETS } from '../utils/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 
 interface DecisionsStore {
   decisions: Decision[];
@@ -210,29 +215,36 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   createDecision: async ({ title, description, category, image }) => {
     set({ isLoading: true, error: null });
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      console.log("murugan decision :"+title);
+
+      const sessionString = await AsyncStorage.getItem('supabase-session');
+      if (!sessionString) throw new Error('Authentication required');
+      const session = JSON.parse(sessionString);
+
 
       const imageUrl = image ? await uploadFile(STORAGE_BUCKETS.DECISIONS, image) : null;
+     const response = await fetch(`${supabaseUrl}/rest/v1/decisions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${session?.access_token}`, // Replace with your session's access token
+        'Prefer': 'return=representation' // Ensures the response includes the inserted record
+      },
+      body: JSON.stringify({
+        title,
+        description,
+        category,
+        user_id: session?.user.id,
+        image_url: imageUrl,
+        status: 'pending'
+      })
+    });
 
-      const { data, error } = await supabase
-        .from('decisions')
-        .insert({
-          title,
-          description,
-          category,
-          user_id: user.id,
-          image_url: imageUrl,
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      set(state => ({
-        decisions: [data, ...state.decisions]
-      }));
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Insert failed: ${errorData.message || 'Unknown error'}`);
+    }
 
       toast.success('Decision posted successfully!');
     } catch (error) {

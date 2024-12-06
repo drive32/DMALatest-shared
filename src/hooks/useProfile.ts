@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 interface Profile {
   id: string;
@@ -85,7 +89,7 @@ export const useProfile = create<ProfileStore>((set) => ({
         try {
           const fileExt = avatarFile.name.split('.').pop();
           const filePath = `${userId}/${Date.now()}.${fileExt}`;
-          
+       
           const { error: uploadError } = await supabase.storage
             .from('avatars')
             .upload(filePath, avatarFile, {
@@ -104,7 +108,7 @@ export const useProfile = create<ProfileStore>((set) => ({
           throw new Error('Failed to upload avatar');
         }
       }
-
+      
       const profileData = {
         fullname: updates.fullName ?? null,
         gender: updates.gender ?? null,
@@ -115,25 +119,44 @@ export const useProfile = create<ProfileStore>((set) => ({
         bio: updates.bio || null,
         avatar: avatarUrl || null
       };
-
+      console.log("Step 1 :"+JSON.stringify(profileData));
       // Get current session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error('Authentication required');
+      const sessionString = await AsyncStorage.getItem('supabase-session');
+
+      if (!sessionString) throw new Error('Authentication required');
       
-      const { data, error } = await supabase 
-        .from('profiles')
-        .update(profileData)
-        .eq('id', userId)
-        .select('*');
+      const session = JSON.parse(sessionString);
 
-      if (error) {
-        console.error('Profile update error:', error);
-        throw error;
+      
+      try {
+        console.log("Starting profile update...");
+        console.log("Session User ID:", session?.user?.id);
+
+        const response = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${session?.user?.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify(profileData),
+        });
+        
+        if (!response.ok) {
+          console.error('Error updating profile:', await response.json());
+        } else {
+          console.log('Profile updated successfully');
+        }
+      
+        console.log("Step 3: Profile updated successfully", profileData);
+      } catch (error) {
+        console.error("Error updating profile:", error.message || error);
       }
 
-      if (!data || data.length === 0) {
-        throw new Error('No data returned from update');
-      }
+        
+
+        console.log("Step two :");
+
 
       toast.success('Profile updated successfully');
 

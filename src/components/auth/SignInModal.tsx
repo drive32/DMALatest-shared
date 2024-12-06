@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,startTransition } from 'react';
 import { Dialog } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -50,7 +50,9 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
       // Close modal first
       onClose();
       // Then navigate
-      navigate('/dashboard');
+      startTransition(() => {
+        navigate('/dashboard');
+      });    
     } catch (err) {
       console.error('Sign in error:', err);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
