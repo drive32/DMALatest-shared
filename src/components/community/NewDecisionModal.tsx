@@ -18,6 +18,9 @@ export function NewDecisionModal({ isOpen, onClose, categories, editingDecision 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [image, setImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [decisionExpired,setDecisionExpired] = useState('');
+  const [calculatedDateTime, setCalculatedDateTime] = useState<string | null>(null); // New datetime
+
   const { createDecision } = useDecisions();
 
   useEffect(() => {
@@ -40,18 +43,37 @@ export function NewDecisionModal({ isOpen, onClose, categories, editingDecision 
         description,
         category: selectedTags[0],
         image: image || undefined,
+        decision_expired: decisionExpired,
       });
       onClose();
       setTitle('');
       setDescription('');
       setSelectedTags([]);
       setImage(null);
+      setDecisionExpired('');
     } catch (error) {
       console.error('Error creating decision:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleExpiryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedDays = parseInt(event.target.value, 10); // Convert to number
+    setDecisionExpired(event.target.value);
+
+    if (!isNaN(selectedDays) && selectedDays > 0) {
+      const currentDate = new Date(); // Current date and time
+      const newDate = new Date(currentDate.getTime() + selectedDays * 24 * 60 * 60 * 1000); // Add days
+
+      // Format datetime as ISO 8601 (or customize it)
+      const formattedDateTime = newDate.toISOString(); // Outputs: YYYY-MM-DDTHH:mm:ss.sssZ
+      setCalculatedDateTime(formattedDateTime); // Set the calculated datetime
+    } else {
+      setCalculatedDateTime(null); // Reset if no valid days are selected
+    }
+  };
+
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,6 +208,23 @@ export function NewDecisionModal({ isOpen, onClose, categories, editingDecision 
                     </div>
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Post Expiration
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="decision_expired"
+                    className="input-primary w-full transition-all focus:ring-2 focus:ring-accent-500 pl-10"
+                    aria-label="Post Expiration"
+                    value={decisionExpired}
+                    onChange={(e) => setDecisionExpired(e.target.value)}              
+                  />
+
+                  
+                </div>
+
 
                 <div className="flex justify-end gap-4">
                   <button

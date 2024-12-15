@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
+import { getSupabaseClient } from '../lib/supabase';
 import { toast } from 'sonner';
 import { Decision } from '../types';
 import { uploadFile } from '../utils/api';
@@ -17,7 +17,9 @@ interface DecisionsStore {
   hasMore: boolean;
   page: number;
   communityDecisions: Decision[];
+  DesicionData:Decision[];
   fetchCommunityDecisions: () => Promise<void>;
+  fetchDecisionById: (id:any) => Promise<void>;
   fetchDecisions: () => Promise<void>;
   loadMoreDecisions: () => Promise<void>;
   createDecision: (data: {
@@ -26,6 +28,10 @@ interface DecisionsStore {
     description: string;
     category?: string;
     image?: File;
+    user_id: string;
+    created_at: string;
+    image_url: string | null;
+    decision_expired: string | null;
   }) => Promise<void>;
   deleteDecision: (id: string) => Promise<void>;
   voteDecision: (decisionId: string, voteType: 'up' | 'down') => Promise<void>;
@@ -35,13 +41,66 @@ interface DecisionsStore {
 export const useDecisions = create<DecisionsStore>((set, get) => ({
   decisions: [],
   communityDecisions: [],
+  DesicionData: [],
   isLoading: false,
   error: null,
   hasMore: true,
   page: 1,
-
-  fetchCommunityDecisions: async () => {
+  fetchDecisionById: async (id:any): Promise<void> => {
     set({ isLoading: true, error: null });
+    const supabase = getSupabaseClient();
+
+    try {
+      // First get all decisions with related data
+      const { data, error } = await supabase
+        .from('decisions')
+        .select(`
+          *,
+          profiles:profiles!user_id (
+            fullname,
+            email
+          ),
+          votes:decision_votes!left (
+            vote_type,
+            user_id
+          ),
+          comments:decision_comments (id)
+        `)
+        .eq('id', id); // Add this to filter by the specific id
+
+      if (error) throw error;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Process and transform the data
+      const decisionsWithVotes = (data || []).map(d => ({
+        ...d,
+        votes: {
+          up: d.votes?.filter(v => v.vote_type === 'up')?.length || 0,
+          down: d.votes?.filter(v => v.vote_type === 'down')?.length || 0,
+          userVote: user ? d.votes?.find(v => v.user_id === user.id)?.vote_type || null : null,
+        },
+        comments: d.comments || [],
+        profiles: {
+          fullname: d.profiles?.fullname || null,
+          email: d.profiles?.email || null
+        }
+      }));
+      
+      set({ DesicionData: decisionsWithVotes });
+    } catch (error) {
+      console.error('Error fetching community decisions:', error);
+      set({ error: 'Failed to fetch community decisions' });
+      toast.error('Unable to load community decisions. Please try again later.');
+      return [];
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  fetchCommunityDecisions: async (): Promise<void> => {
+    set({ isLoading: true, error: null });
+    const supabase = getSupabaseClient();
+
     try {
       // First get all decisions with related data
       const { data, error } = await supabase
@@ -71,7 +130,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
         votes: {
           up: d.votes?.filter(v => v.vote_type === 'up')?.length || 0,
           down: d.votes?.filter(v => v.vote_type === 'down')?.length || 0,
-          userVote: user ? d.votes?.find(v => v.user_id === user.id)?.vote_type || null : null
+          userVote: user ? d.votes?.find(v => v.user_id === user.id)?.vote_type || null : null,
         },
         comments: d.comments || [],
         profiles: {
@@ -93,9 +152,14 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
 
   fetchDecisions: async () => {
     set({ isLoading: true, error: null });
+    const supabase = getSupabaseClient();
+
     try {
+      console.log("murugan decision : step 11");
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) throw new Error('Authentication required');
+      console.log("murugan decision : step 22");
 
       // Fetch decisions with related data
       const { data, error } = await supabase
@@ -120,7 +184,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
         console.error('Database error:', error);
         throw error;
       }
-      
+
       const decisionsWithVotes = (data || []).map(d => ({
         ...d,
         votes: {
@@ -149,6 +213,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
 
   loadMoreDecisions: async () => {
+    const supabase = getSupabaseClient();
+
     const { isLoading, hasMore, page, decisions } = get();
     if (isLoading || !hasMore) return;
 
@@ -192,6 +258,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
 
   deleteDecision: async (id: string) => {
+    const supabase = getSupabaseClient();
+
     try {
       const { error } = await supabase
         .from('decisions')
@@ -212,39 +280,34 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
     }
   },
 
-  createDecision: async ({ title, description, category, image }) => {
+  createDecision: async ({ title, description, category, image,decision_expired }) => {
+    const supabase = getSupabaseClient();
+    const { fetchCommunityDecisions } = get();
+
     set({ isLoading: true, error: null });
     try {
-      console.log("murugan decision :"+title);
-
-      const sessionString = await AsyncStorage.getItem('supabase-session');
-      if (!sessionString) throw new Error('Authentication required');
-      const session = JSON.parse(sessionString);
-
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
       const imageUrl = image ? await uploadFile(STORAGE_BUCKETS.DECISIONS, image) : null;
-     const response = await fetch(`${supabaseUrl}/rest/v1/decisions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': supabaseAnonKey,
-        'Authorization': `Bearer ${session?.access_token}`, // Replace with your session's access token
-        'Prefer': 'return=representation' // Ensures the response includes the inserted record
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        category,
-        user_id: session?.user.id,
-        image_url: imageUrl,
-        status: 'pending'
-      })
-    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Insert failed: ${errorData.message || 'Unknown error'}`);
-    }
+      const { data, error } = await supabase
+        .from('decisions')
+        .insert({
+          title,
+          description,
+          category,
+          user_id: user.id,
+          image_url: imageUrl,
+          status: 'pending',
+          decision_expired,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await fetchCommunityDecisions();
 
       toast.success('Decision posted successfully!');
     } catch (error) {
@@ -257,7 +320,10 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
     }
   },
 
+
   voteDecision: async (decisionId: string, voteType: 'up' | 'down') => {
+    const supabase = getSupabaseClient();
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in to vote');
@@ -297,7 +363,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
 
       // Optimistically update UI
       set(state => ({
-        decisions: state.decisions.map(d => {
+        communityDecisions: state.communityDecisions.map(d => {
+          console.log("vote murugan id :"+decisionId);
           if (d.id === decisionId) {
             const votes = { ...d.votes };
             if (existingVote) {
@@ -328,6 +395,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
 
   addComment: async (decisionId: string, comment: string) => {
+    const supabase = getSupabaseClient();
+
     try {
       const { error } = await supabase
         .from('decision_comments')

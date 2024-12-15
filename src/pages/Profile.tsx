@@ -5,7 +5,7 @@ import { useProfile } from '../hooks/useProfile';
 import { UserCircle, AlertCircle } from 'lucide-react';
 import { Sidebar } from '../components/decision/Sidebar';
 import { ProfileForm } from '../components/profile/ProfileForm';
-import { supabase } from '../lib/supabase';
+import { getSupabaseClient } from '../lib/supabase';
 
 export function Profile() {
   const { user } = useAuth();
@@ -14,6 +14,8 @@ export function Profile() {
 
   useEffect(() => {
     const checkSession = async () => {
+      const supabase = getSupabaseClient();
+
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
@@ -77,7 +79,8 @@ export function Profile() {
                 dateOfBirth: profile.dateOfBirth || '',
                 phoneNumber: profile.phoneNumber || '',
                 address: profile.address || '',
-                bio: profile.bio || ''
+                bio: profile.bio || '',
+                avatar:profile.avatar || '',
               } : undefined}
             />
           </motion.div>

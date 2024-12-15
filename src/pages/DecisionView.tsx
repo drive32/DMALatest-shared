@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from '../components/decision/Sidebar';
 import { 
@@ -6,7 +7,7 @@ import {
   TrendingUp, Filter, Bell, Image, Hash, Loader2
 } from 'lucide-react';
 import { HowItWorks } from '../components/community/HowItWorks';
-import { DecisionCard } from '../components/community/DecisionCard';
+import { DecisionFeedView } from '../components/community/DecisionFeedView';
 import { NewDecisionModal } from '../components/community/NewDecisionModal';
 import { FeaturedDecisions } from '../components/community/FeaturedDecisions';
 import { useSidebarStore } from '../store/sidebarStore';
@@ -46,7 +47,8 @@ interface Decision {
   featured?: boolean;
 }
 
-export function CommunityDecisions() {
+export function DecisionView() {
+  const { id } = useParams();
   const [isNewDecisionModalOpen, setIsNewDecisionModalOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,8 +56,8 @@ export function CommunityDecisions() {
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
   const [editingDecision, setEditingDecision] = useState<Decision | null>(null);
   const { 
-    communityDecisions, 
-    fetchCommunityDecisions, 
+    DesicionData, 
+    fetchDecisionById, 
     loadMoreDecisions, 
     isLoading, 
     hasMore, 
@@ -70,7 +72,7 @@ export function CommunityDecisions() {
   ];
 
   useEffect(() => {
-    fetchCommunityDecisions();
+    fetchDecisionById(id);
   }, []);
 
   // Infinite scroll handler
@@ -107,7 +109,7 @@ export function CommunityDecisions() {
     setIsNewDecisionModalOpen(true);
   };
 
-  const filteredDecisions = communityDecisions
+  const filteredDecisions = DesicionData
   .filter(d => {
     // Match search query in title or description
     const matchesSearch = d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -150,69 +152,24 @@ export function CommunityDecisions() {
                 Share your decisions, gather insights, and connect with our community.
                 Your next great decision starts with a conversation.
               </p>
-              <button
-                onClick={() => setIsNewDecisionModalOpen(true)}
-                className="btn-primary bg-white text-accent-600 hover:bg-gray-50"
-              >
-                Share Your Decision
-              </button>
+             
             </div>
           </motion.div>
 
-          {/* How It Works Section */}
-          <HowItWorks />
-
-          {/* Search and Filters */}
-          <div className="flex flex-wrap items-center gap-4 mb-8">
-            <div className="relative flex-1 min-w-[300px]">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search decisions..."
-                className="input-primary pl-12 w-full"
-              />
-            </div>
-
-            <div className="flex items-center gap-4">
-              <select
-                value={selectedCategory || ''}
-                onChange={(e) => setSelectedCategory(e.target.value || null)}
-                className="input-primary"
-              >
-                <option value="">All Categories</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'recent' | 'popular')}
-                className="input-primary"
-              >
-                <option value="recent">Most Recent</option>
-                <option value="popular">Most Popular</option>
-              </select>
-            </div>
-          </div>
 
           {/* Featured Decisions */}
-          <FeaturedDecisions decisions={communityDecisions.filter(d => d.featured)} />
+          <FeaturedDecisions decisions={DesicionData.filter(d => d.featured)} />
 
           {/* Decision Grid */}
           <div className="space-y-6">
-            <AnimatePresence mode="popLayout">
-              {filteredDecisions.map((decision) => (
-                <DecisionCard
-                  key={decision.id}
-                  decision={decision}
-                  onVote={handleVote}
-                  onEdit={handleEdit}
-                />
-              ))}
-            </AnimatePresence>
+          {filteredDecisions.map((decision) => (
+              <DecisionFeedView
+                key={decision.id}
+                decision={decision}
+                onVote={handleVote}
+                onEdit={handleEdit}
+              />
+            ))}
           </div>
         </div>
       </main>

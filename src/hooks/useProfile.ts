@@ -1,6 +1,9 @@
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
+import { getSupabaseClient } from '../lib/supabase';
 import { toast } from 'sonner';
+import { uploadFile } from '../utils/api';
+import { STORAGE_BUCKETS } from '../utils/constants';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -35,6 +38,7 @@ export const useProfile = create<ProfileStore>((set) => ({
 
   fetchProfile: async (userId: string) => {
     set({ isLoading: true, error: null });
+    const supabase = getSupabaseClient();
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -68,6 +72,13 @@ export const useProfile = create<ProfileStore>((set) => ({
   },
 
   updateProfile: async (userId: string, updates: Partial<Profile>, avatarFile?: File | null) => {
+
+    const sessionString = await AsyncStorage.getItem('supabase-session');
+
+    if (!sessionString) throw new Error('Authentication required');
+    
+    const session = JSON.parse(sessionString);
+
     if (!userId) {
       toast.error('Invalid user');
       throw new Error('Invalid user ID');
@@ -81,33 +92,10 @@ export const useProfile = create<ProfileStore>((set) => ({
     try {
       let avatarUrl = updates.avatar;
       
-      if (avatarFile) {
-        if (avatarFile.size > 5 * 1024 * 1024) {
-          throw new Error('Avatar file size must be less than 5MB');
-        }
-        
-        try {
-          const fileExt = avatarFile.name.split('.').pop();
-          const filePath = `${userId}/${Date.now()}.${fileExt}`;
-       
-          const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(filePath, avatarFile, {
-              upsert: true
-            });
-          
-          if (uploadError) throw uploadError;
-          
-          const { data: { publicUrl } } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(filePath);
-          
-          avatarUrl = publicUrl;
-        } catch (error) {
-          console.error('Avatar upload error:', error);
-          throw new Error('Failed to upload avatar');
-        }
+      if (avatarFile) { 
+        avatarUrl = avatarFile ? await uploadFile(STORAGE_BUCKETS.AVATARS, avatarFile) : avatarUrl;
       }
+
       
       const profileData = {
         fullname: updates.fullName ?? null,
@@ -119,39 +107,31 @@ export const useProfile = create<ProfileStore>((set) => ({
         bio: updates.bio || null,
         avatar: avatarUrl || null
       };
-      console.log("Step 1 :"+JSON.stringify(profileData));
+      console.log("Step 3 :"+JSON.stringify(profileData));
       // Get current session
-      const sessionString = await AsyncStorage.getItem('supabase-session');
-
-      if (!sessionString) throw new Error('Authentication required');
-      
-      const session = JSON.parse(sessionString);
+     
 
       
-      try {
-        console.log("Starting profile update...");
-        console.log("Session User ID:", session?.user?.id);
+      console.log("Starting profile update...");
+      console.log("Session User ID:", session?.user?.id);
 
-        const response = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${session?.user?.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': supabaseAnonKey,
-            'Authorization': `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify(profileData),
-        });
-        
-        if (!response.ok) {
-          console.error('Error updating profile:', await response.json());
-        } else {
-          console.log('Profile updated successfully');
-        }
+      const response = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${session?.user?.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify(profileData),
+      });
       
-        console.log("Step 3: Profile updated successfully", profileData);
-      } catch (error) {
-        console.error("Error updating profile:", error.message || error);
+      if (!response.ok) {
+        console.error('Error updating profile 2:', await response.json());
+      } else {
+        console.log('Profile updated successfully');
       }
+    
+      console.log("Step 3: Profile updated successfully", profileData);
 
         
 
@@ -161,37 +141,31 @@ export const useProfile = create<ProfileStore>((set) => ({
       toast.success('Profile updated successfully');
 
       set((state) => ({
-        profile: state.profile ? {
-          ...state.profile,
-          fullName: data[0].fullname || null,
-          gender: data[0].gender || null,
-          country: data[0].country || null,
-          dateOfBirth: data[0].dob || null,
-          phoneNumber: data[0].phone_number || null,
-          address: data[0].address || null,
-          bio: data[0].bio || null,
-          ...updates,
-          avatar: avatarUrl ?? state.profile.avatar
-        } : {
+        profile: {
           id: userId,
-          fullName: data[0].fullname || null,
-          gender: data[0].gender || null,
-          country: data[0].country || null,
-          dateOfBirth: data[0].dob || null,
-          phoneNumber: data[0].phone_number || null,
-          address: data[0].address || null,
-          bio: data[0].bio || null,
-          avatar: avatarUrl
+          fullName: profileData.fullname || null,
+          gender: profileData.gender || null,
+          country: profileData.country || null,
+          dateOfBirth: profileData.dob || null,
+          phoneNumber: profileData.phone_number || null,
+          address: profileData.address || null,
+          bio: profileData.bio || null,
+          avatar: avatarUrl || null
         }
       }));
 
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        toast.error('Update timed out. Please try again.');
-      } else {
-        toast.error(error.message || 'Failed to update profile');
-        set({ error: error.message || 'Failed to update profile' });
+    } catch (error : unknown) {
+
+      let errorMessage = 'Failed to update profile';
+
+      if (error instanceof Error) {
+        errorMessage = error.message; // Extract message if error is an instance of Error
+      } else if (typeof error === 'string') {
+        errorMessage = error; // If the error is a string, use it directly
       }
+      toast.error(errorMessage || 'Failed to update profile');
+      set({ error: errorMessage || 'Failed to update profile' });
+
       throw error;
     } finally {
       clearTimeout(timeoutId);

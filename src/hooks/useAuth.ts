@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
+import { getSupabaseClient } from '../lib/supabase';
 import { getAuthErrorMessage } from '../utils/errorHandling';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -32,6 +32,8 @@ export const useAuth = create<AuthState>((set) => ({
   lastActivity: null,
 
   refreshSession: async () => {
+    const supabase = getSupabaseClient();
+
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
@@ -72,6 +74,8 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   signUp: async (email: string, password: string) => {
+    const supabase = getSupabaseClient();
+
     try {
       set({ loading: true });
       
@@ -135,6 +139,8 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   signIn: async (email: string, password: string) => {
+    const supabase = getSupabaseClient();
+
     try {
      // Call Supabase signInWithPassword
     const result = await supabase.auth.signInWithPassword({
@@ -176,26 +182,23 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
-
+    const supabase = getSupabaseClient();
+    console.log("logout step 1");
     try {
+      // Clear any stored session data
+      localStorage.removeItem('sb-blbfmoddnuoxsezajhwy-auth-token');
+      sessionStorage.clear();
+      console.log("logout step 2");
 
-      const sessionString = await AsyncStorage.getItem('supabase-session');
-      if (!sessionString) throw new Error('Authentication required');
-      const session = JSON.parse(sessionString);
-
-      const response = await fetch(`${supabaseUrl}/auth/v1/logout`, {
-        method: 'POST',
-        headers: {
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${session?.access_token}`, // Replace with the current access token
-        },
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut({
+        scope: 'global'
       });
-  
-      if (!response.ok) {
-        throw new Error('Failed to log out');
-      }
 
-      await AsyncStorage.removeItem('supabase-session');
+      console.log("logout step 3");
+      
+      if (error) throw error;
+      
       // Clear all state
       set({ 
         user: null,
@@ -204,9 +207,9 @@ export const useAuth = create<AuthState>((set) => ({
       });
       
       return { error: null };
-
     } catch (error) {
-      throw new Error('Failed to log out');
+      console.error('Sign out error:', error);
+      return { error: getAuthErrorMessage(error) };
     }
   }
 }));

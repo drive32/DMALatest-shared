@@ -25,6 +25,11 @@ interface Decision {
     author: string;
     createdAt: Date;
   }>;
+  user_id?: number; // Optional
+  created_at?: string;
+  category?: string;
+  image_url?: string;
+
 }
 
 interface Props {

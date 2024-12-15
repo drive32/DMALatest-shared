@@ -28,7 +28,7 @@ interface Props {
   onEdit: (decision: Decision) => void;
 }
 
-export function DecisionCard({ decision, onVote, onEdit }: Props) {
+export function DecisionFeedView({ decision, onVote, onEdit }: Props) {
   const { user } = useAuth();
   const { deleteDecision } = useDecisions();
   const [isDeleting, setIsDeleting] = useState(false);

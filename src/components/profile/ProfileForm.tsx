@@ -13,6 +13,7 @@ interface ProfileFormData {
   phoneNumber: string;
   address: string;
   bio: string;
+  avatar:string;
 }
 
 interface ProfileFormProps {
@@ -24,7 +25,7 @@ export function ProfileForm({ userId, initialData }: ProfileFormProps) {
   const { updateProfile } = useProfile();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(initialData?.avatar || '');
 
   const { register, handleSubmit, formState: { errors } } = useForm<ProfileFormData>({
     defaultValues: initialData || {
@@ -34,7 +35,8 @@ export function ProfileForm({ userId, initialData }: ProfileFormProps) {
       dateOfBirth: '',
       phoneNumber: '',
       address: '',
-      bio: ''
+      bio: '',
+      avatar:'',
     }
   });
 
