@@ -1,42 +1,59 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../types/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { Database } from '../types/supabase'; // Adjust the path as needed
 
-// Ensure environment variables are properly set
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase environment variables (URL or Key) are missing.');
-}
-
-// Singleton instance
-let supabaseInstance: SupabaseClient<Database> | null = null;
+// Singleton instance for Supabase client
+let supabase: SupabaseClient<Database> | null = null;
 
 /**
- * Retrieves the Supabase client instance.
- * Initializes the instance if it doesn't already exist.
- *
- * @returns {SupabaseClient<Database>} - The Supabase client instance.
+ * Function to initialize or retrieve the Supabase client.
+ * Avoids creating a new client if there's already a session in storage.
  */
-export const getSupabaseClient = (): SupabaseClient<Database> => {
-  if (!supabaseInstance) {
-    console.log('Initializing Supabase client...');
-    supabaseInstance = createClient<Database>(supabaseUrl, supabaseKey, {
-      auth: {
-        autoRefreshToken: true, // Automatically refreshes the token when it expires
-        persistSession: true,  // Persists session data in AsyncStorage
-        detectSessionInUrl: false, // Prevents session handling from interfering with deep links
-        storage: AsyncStorage, // Use AsyncStorage for session storage in React Native
-      },
-      global: {
-        headers: {
-          'Cache-Control': 'no-cache', // Prevents caching
-          'Pragma': 'no-cache',       // Ensures up-to-date requests
+export const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
+  console.info('Restoring session...');
+
+  if (!supabase) {
+    const storedSession = await AsyncStorage.getItem('supabase-session');
+
+    if (storedSession) {
+      const parsedSession = JSON.parse(storedSession);
+      console.info('Restoring session...');
+      supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: false,
+          storage: AsyncStorage,
         },
+      });
+
+      // Restore session explicitly
+      await supabase.auth.setSession(parsedSession);
+    } else {
+      console.info('No session found1. Initializing Supabase client...');
+      supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: false,
+          storage: AsyncStorage,
+        },
+      });
+    }
+  }else{
+    console.info('No session found2. Initializing Supabase client...');
+    supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+        storage: AsyncStorage,
       },
     });
   }
 
-  return supabaseInstance;
+  return supabase;
 };

@@ -58,7 +58,7 @@ export async function uploadFile(bucket: string, file: File) {
 }
 
 export async function deleteFile(bucket: string, filePath: string) {
-  const supabase = getSupabaseClient();
+  const supabase = await getSupabaseClient();
 
   const { error } = await supabase.storage
     .from(bucket)

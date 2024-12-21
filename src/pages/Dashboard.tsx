@@ -36,7 +36,7 @@ ChartJS.register(
 );
 
 export function Dashboard() {
-  const { user } = useAuth();
+  const { user,refreshSession } = useAuth();
   const { profile, fetchProfile } = useProfile();
   const { decisions, fetchDecisions } = useDecisions();
   const [selectedTimeRange, setSelectedTimeRange] = useState('week');
@@ -44,11 +44,24 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    if (user) {
-      fetchProfile(user.id);
-      fetchDecisions();
-    }
+    const handleUserChange = async () => {
+  
+      if (user) {
+  
+        // Await asynchronous functions here
+        await fetchProfile(user.id);
+        await fetchDecisions();
+      } else {
+        console.log("test murugan 3");
+  
+        // Call refreshSession when user is null
+        await refreshSession();
+      }
+    };
+  
+    handleUserChange();
   }, [user, fetchDecisions]);
+  
 
   const votingTrendsData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],

@@ -4,7 +4,6 @@ import { toast } from 'sonner';
 import { Decision } from '../types';
 import { uploadFile } from '../utils/api';
 import { STORAGE_BUCKETS } from '../utils/constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -20,6 +19,8 @@ interface DecisionsStore {
   DesicionData:Decision[];
   fetchCommunityDecisions: () => Promise<void>;
   fetchDecisionById: (id:any) => Promise<void>;
+  fetchDecisionCountByGender: (id:any) => Promise<{ male: { up: number; down: number }; female: { up: number; down: number } }>;
+
   fetchDecisions: () => Promise<void>;
   loadMoreDecisions: () => Promise<void>;
   createDecision: (data: {
@@ -46,9 +47,53 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   error: null,
   hasMore: true,
   page: 1,
+  fetchDecisionCountByGender: async (id: any): Promise<{ male: { up: number; down: number }; female: { up: number; down: number } }> => {
+    const supabase = await getSupabaseClient();
+
+    try {
+      const { data, error } = await supabase
+        .from('decision_votes')
+        .select(`
+          vote_type,
+          profiles:profiles!inner (
+            gender
+          )
+        `)
+        .eq('decision_id', id);
+  
+      if (error) throw new Error(`Error fetching decision votes: ${error.message}`);
+  
+      // Aggregate the results
+      const result = data?.reduce(
+        (acc, { vote_type, profiles }) => {
+          if (profiles?.gender === 'male') {
+            if (vote_type === 'up') acc.male.up++;
+            if (vote_type === 'down') acc.male.down++;
+          } else if (profiles?.gender === 'female') {
+            if (vote_type === 'up') acc.female.up++;
+            if (vote_type === 'down') acc.female.down++;
+          }
+          return acc;
+        },
+        {
+          male: { up: 0, down: 0 },
+          female: { up: 0, down: 0 },
+        }
+      );
+  
+      console.log('Gender vote counts:', result);
+  
+      return result;
+    } catch (err) {
+      console.error('Error fetching gender vote counts:', err);
+      throw new Error(err.message || 'Failed to fetch gender vote counts');
+    }
+        
+  },
+  
   fetchDecisionById: async (id:any): Promise<void> => {
     set({ isLoading: true, error: null });
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     try {
       // First get all decisions with related data
@@ -58,7 +103,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
           *,
           profiles:profiles!user_id (
             fullname,
-            email
+            email,
+            avatar
           ),
           votes:decision_votes!left (
             vote_type,
@@ -83,7 +129,9 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
         comments: d.comments || [],
         profiles: {
           fullname: d.profiles?.fullname || null,
-          email: d.profiles?.email || null
+          email: d.profiles?.email || null,
+          avatar: d.profiles?.avatar || null
+
         }
       }));
       
@@ -99,7 +147,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
   fetchCommunityDecisions: async (): Promise<void> => {
     set({ isLoading: true, error: null });
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     try {
       // First get all decisions with related data
@@ -109,7 +157,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
           *,
           profiles:profiles!user_id (
             fullname,
-            email
+            email,
+            avatar
           ),
           votes:decision_votes!left (
             vote_type,
@@ -135,7 +184,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
         comments: d.comments || [],
         profiles: {
           fullname: d.profiles?.fullname || null,
-          email: d.profiles?.email || null
+          email: d.profiles?.email || null,
+          avatar: d.profiles?.avatar || null
         }
       }));
       
@@ -152,14 +202,12 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
 
   fetchDecisions: async () => {
     set({ isLoading: true, error: null });
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     try {
-      console.log("murugan decision : step 11");
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) throw new Error('Authentication required');
-      console.log("murugan decision : step 22");
 
       // Fetch decisions with related data
       const { data, error } = await supabase
@@ -168,7 +216,8 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
           *,
           profiles:profiles!user_id (
             fullname,
-            email
+            email,
+            avatar
           ),
           votes:decision_votes!left (
             vote_type,
@@ -195,7 +244,9 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
         comments: d.comments || [],
         profiles: {
           fullname: d.profiles?.fullname || null,
-          email: d.profiles?.email || null
+          email: d.profiles?.email || null,
+          avatar: d.profiles?.avatar || null
+
         }
       }));
       
@@ -213,7 +264,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
 
   loadMoreDecisions: async () => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     const { isLoading, hasMore, page, decisions } = get();
     if (isLoading || !hasMore) return;
@@ -258,7 +309,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
 
   deleteDecision: async (id: string) => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     try {
       const { error } = await supabase
@@ -281,7 +332,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
 
   createDecision: async ({ title, description, category, image,decision_expired }) => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
     const { fetchCommunityDecisions } = get();
 
     set({ isLoading: true, error: null });
@@ -322,7 +373,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
 
 
   voteDecision: async (decisionId: string, voteType: 'up' | 'down') => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -364,7 +415,6 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
       // Optimistically update UI
       set(state => ({
         communityDecisions: state.communityDecisions.map(d => {
-          console.log("vote murugan id :"+decisionId);
           if (d.id === decisionId) {
             const votes = { ...d.votes };
             if (existingVote) {
@@ -395,7 +445,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
   },
 
   addComment: async (decisionId: string, comment: string) => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     try {
       const { error } = await supabase

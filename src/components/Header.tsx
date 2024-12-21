@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { UserCircle, Menu, X } from 'lucide-react';
 import { SignUpModal } from './auth/SignUpModal';
 import { SignInModal } from './auth/SignInModal';
+import { ForgotModal } from './auth/ForgotModal';
 
 export function Header() {
   const navigate = useNavigate();
@@ -13,12 +14,47 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+
   const { user, signOut } = useAuth();
 
+   // Reset all modals
+   const resetModals = () => {
+    setShowSignIn(false);
+    setShowSignUp(false);
+    setShowForgot(false);
+  };
+
   useEffect(() => {
-    const handleOpenSignUpModal = () => setShowSignUp(true);
+
+    const handleOpenSignInModal = () => {
+      resetModals();
+      setShowSignIn(true);
+    };
+
+    const handleOpenSignUpModal = () => {
+      resetModals();
+      setShowSignUp(true);
+    };
+
+    const handleOpenForgotPasswordModal = () => {
+      resetModals();
+      setShowForgot(true);
+    };
+
     document.addEventListener('open-signup-modal', handleOpenSignUpModal);
-    return () => document.removeEventListener('open-signup-modal', handleOpenSignUpModal);
+    document.addEventListener('open-signin-modal', handleOpenSignInModal);
+    document.addEventListener('open-forgot-modal', handleOpenForgotPasswordModal);
+
+    // Clean up event listeners
+    return () => {
+      document.removeEventListener("open-signin-modal", handleOpenSignInModal);
+      document.removeEventListener("open-signup-modal", handleOpenSignUpModal);
+      document.removeEventListener(
+        "open-forgotpassword-modal",
+        handleOpenForgotPasswordModal
+      );
+    };
   }, []);
 
   const handleSignOut = async () => {
@@ -162,6 +198,10 @@ export function Header() {
       <SignInModal
         isOpen={showSignIn}
         onClose={() => setShowSignIn(false)}
+      />
+       <ForgotModal
+        isOpen={showForgot}
+        onClose={() => setShowForgot(false)}
       />
     </>
   );

@@ -8,24 +8,30 @@ import { ProfileForm } from '../components/profile/ProfileForm';
 import { getSupabaseClient } from '../lib/supabase';
 
 export function Profile() {
-  const { user } = useAuth();
+  const { user,refreshSession,setUser } = useAuth();
   const { profile, isLoading, error, fetchProfile } = useProfile();
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkSession = async () => {
-      const supabase = getSupabaseClient();
-
-      const { data: { session } } = await supabase.auth.getSession();
+      const handleUserChange = async () => {
       
-      if (session?.user) {
-        setUserId(session.user.id);
-        fetchProfile(session.user.id).catch(console.error);
-      }
-    };
 
-    checkSession();
-  }, [user]);
+        if (user) {
+    
+        // Await asynchronous functions here
+          await fetchProfile(user.id);
+        } else{
+          const { user } = await refreshSession(); // Destructure 'user' from the result
+          setUser(user);
+          if (user) {
+            await fetchProfile(user.id);
+          }
+          
+        }
+      };
+    
+      handleUserChange();
+    }, [user,refreshSession]);
 
   if (!user) return null;
 
@@ -70,19 +76,24 @@ export function Profile() {
               </div>
             )}
 
-            <ProfileForm
-              userId={userId || user.id}
-              initialData={profile ? {
-                fullName: profile.fullName || '',
-                gender: profile.gender || '',
-                country: profile.country || '',
-                dateOfBirth: profile.dateOfBirth || '',
-                phoneNumber: profile.phoneNumber || '',
-                address: profile.address || '',
-                bio: profile.bio || '',
-                avatar:profile.avatar || '',
-              } : undefined}
-            />
+            {profile ? (
+              <ProfileForm
+                userId={userId || user.id}
+                initialData={{
+                  fullName: profile.fullName || '',
+                  gender: profile.gender || '',
+                  country: profile.country || '',
+                  dateOfBirth: profile.dateOfBirth || '',
+                  phoneNumber: profile.phoneNumber || '',
+                  address: profile.address || '',
+                  bio: profile.bio || '',
+                  avatar: profile.avatar || '',
+                }}
+              />
+            ) : (
+              <div>Loading...</div> // Optionally render a loading state
+            )}
+
           </motion.div>
         </div>
       </main>

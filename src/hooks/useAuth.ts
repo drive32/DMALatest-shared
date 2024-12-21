@@ -3,8 +3,8 @@ import { getSupabaseClient } from '../lib/supabase';
 import { getAuthErrorMessage } from '../utils/errorHandling';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const forgotRedirectionUrl = import.meta.env.VITE_FORGOT_PASSWORD_REDIRECT_URL;
 
 
 interface User {
@@ -18,49 +18,94 @@ interface AuthState {
   loading: boolean;
   sessionTimeout: number | null;
   lastActivity: number | null;
+  setUser: (user: User | null) => void;
   signUp: (email: string, password: string) => Promise<{ user: User | null; error: string | null; message?: string }>;
   signIn: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
+  forgotPassword: (email: string) => Promise<{ error: string | null,message?: string }>;
   signOut: () => Promise<{ error: string | null }>;
-  refreshSession: () => Promise<void>;
+  refreshSession: () =>  Promise<{ user: User | null }>;
   checkSession: () => void;
 }
 
-export const useAuth = create<AuthState>((set) => ({
+export const useAuth = create<AuthState>((set,get) => ({
   user: null,
   loading: false,
   sessionTimeout: null,
   lastActivity: null,
 
-  refreshSession: async () => {
-    const supabase = getSupabaseClient();
+  setUser: (user) => set({ user }),
 
+  refreshSession: async (): Promise<{ user: User | null }> => {
+    const supabase = await getSupabaseClient();
+  
     try {
+      console.log('Fetching session...');
       const { data: { session }, error } = await supabase.auth.getSession();
+  
       if (error) {
+        console.error('Error fetching session:', error);
+  
         if (error.message === 'refresh_token_not_found') {
           // Clear invalid session state
           set({ user: null, sessionTimeout: null, lastActivity: null });
-          return;
+          return { user: null };
         }
-        throw error;
+  
+        throw error; // Ensure proper error handling
       }
-      
+  
       if (session) {
-        const { data: { session: refreshedSession }, error: refreshError } = 
+        console.log('Session found, attempting refresh...');
+        const { data: { session: refreshedSession }, error: refreshError } =
           await supabase.auth.refreshSession();
-        
-        if (refreshError) throw refreshError;
-        if (!refreshedSession) throw new Error('Failed to refresh session');
-        
-        set({ lastActivity: Date.now() });
+  
+        if (refreshError) {
+          console.error('Error refreshing session:', refreshError);
+          throw refreshError;
+        }
+  
+        if (!refreshedSession) {
+          throw new Error('Failed to refresh session');
+        }
+  
+        console.log('Session refreshed successfully:', refreshedSession);
+  
+        // Extract user data
+        const refreshedUser = refreshedSession.user;
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('fullname')
+          .eq('id', refreshedUser.id)
+          .single();
+  
+        const user: User = {
+          id: refreshedUser.id,
+          email: refreshedUser.email || '',
+          fullName: profileData?.fullname || null,
+        };
+  
+        set({
+          user,
+          lastActivity: Date.now(),
+          sessionTimeout: 3600000, // 1 hour
+        });
+  
+        return { user };
       }
+  
+      // No session available
+      return { user: null };
     } catch (error) {
       console.error('Session refresh error:', error);
+  
       await supabase.auth.signOut();
       set({ user: null, sessionTimeout: null, lastActivity: null });
+  
+      // Return null in case of error
+      return { user: null };
     }
   },
-
+    
   checkSession: () => {
     const state = useAuth.getState();
     const { lastActivity, sessionTimeout } = state;
@@ -74,9 +119,11 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   signUp: async (email: string, password: string) => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
+    const { signIn } = get();
 
     try {
+
       set({ loading: true });
       
       // First check if user already exists
@@ -109,27 +156,23 @@ export const useAuth = create<AuthState>((set) => ({
         fullname: null,
         email: email,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_onboarded: false
+        updated_at: new Date().toISOString()
       });
       
       if (profileError) {
         console.error('Profile creation error:', profileError);
         // Continue even if profile creation fails - we can retry later
       }
-      
-      const user = {
-        id: authUser.id,
-        email: authUser.email || '',
-        fullName: null
-      };
-      
-      set({ user });
-      return { 
-        user, 
-        error: null,
-        message: 'Account created successfully!'
-      };
+
+       // Automatically call signIn after successful signUp
+    const signInResult = await signIn(email, password);
+
+    if (signInResult.error) {
+      throw new Error('Account created, click login to continuee...');
+    }
+
+    return { user: signInResult.user, error: null,message: 'Account created successfully!' };
+
     } catch (error) {
       console.error('Sign up error:', error);
       return { user: null, error: getAuthErrorMessage(error) };
@@ -139,7 +182,7 @@ export const useAuth = create<AuthState>((set) => ({
   },
 
   signIn: async (email: string, password: string) => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     try {
      // Call Supabase signInWithPassword
@@ -159,10 +202,12 @@ export const useAuth = create<AuthState>((set) => ({
                               .select('fullname')
                               .eq('id', data.user.id)
                               .single();
-    // Save session manually if persistSession is true
+    
+                               // Save session manually if persistSession is true
     if (data.session) {
       await AsyncStorage.setItem('supabase-session', JSON.stringify(data.session));
     }
+
     const user = {
       id: data.user.id,
       email: data.user.email || '',
@@ -181,8 +226,38 @@ export const useAuth = create<AuthState>((set) => ({
     }
   },
 
+
+  forgotPassword: async (email: string) => {
+    const supabase = await getSupabaseClient();
+
+    try {
+
+          // First check if user already exists
+          const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .single();
+  
+        if (!existingUser) {
+          return { 
+            error: 'This email is not available.' 
+          };
+        }
+  
+     // Call Supabase signInWithPassword
+     const result = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: forgotRedirectionUrl,
+    });
+    return { error: null };
+    } catch (error) {
+      console.error('Forgot password in error:', error);
+      return { user: null, error: getAuthErrorMessage(error) };
+    }
+  },
+
   signOut: async () => {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
     console.log("logout step 1");
     try {
       // Clear any stored session data

@@ -30,7 +30,7 @@ interface ProfileStore {
   updateProfile: (userId: string, updates: Partial<Profile>, avatarFile?: File | null) => Promise<void>;
 }
 
-export const useProfile = create<ProfileStore>((set) => ({
+export const useProfile = create<ProfileStore>((set,get) => ({
   profile: null,
   isLoading: false,
   isUpdating: false,
@@ -38,7 +38,7 @@ export const useProfile = create<ProfileStore>((set) => ({
 
   fetchProfile: async (userId: string) => {
     set({ isLoading: true, error: null });
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -49,7 +49,9 @@ export const useProfile = create<ProfileStore>((set) => ({
       if (error && error.code !== 'PGRST116') throw error;
 
       if (data) {
-        set({
+
+        set((state) => ({
+          ...state, // Ensure you spread the existing state
           profile: {
             id: data.id,
             fullName: data.fullname,
@@ -61,7 +63,8 @@ export const useProfile = create<ProfileStore>((set) => ({
             bio: data.bio,
             avatar: data.avatar
           }
-        });
+        }));
+
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -131,13 +134,6 @@ export const useProfile = create<ProfileStore>((set) => ({
         console.log('Profile updated successfully');
       }
     
-      console.log("Step 3: Profile updated successfully", profileData);
-
-        
-
-        console.log("Step two :");
-
-
       toast.success('Profile updated successfully');
 
       set((state) => ({

@@ -19,7 +19,7 @@ interface Decision {
   votes?: { up: number; down: number };
   comments?: Array<any>;
   decision_expired?: string | null;
-  profiles?: { fullname?: string; email?: string };
+  profiles?: { fullname?: string; email?: string; avatar:string };
 }
 
 interface Props {
@@ -79,11 +79,20 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
 
       <div className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-accent-50 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-accent-50 flex items-center justify-center">
+          {decision.profiles?.avatar ? (
+            <img 
+              src={decision.profiles.avatar} 
+              alt={decision.profiles.fullname || 'User'} 
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
             <span className="text-lg font-medium text-accent-600">
               {decision.profiles?.fullname?.[0]?.toUpperCase() || decision.profiles?.email?.[0]?.toUpperCase() || '?'}
             </span>
-          </div>
+          )}
+        </div>
+
           <div className="flex-1">
             <h3 className="font-medium text-primary">
               {decision.profiles?.fullname || decision.profiles?.email || 'Anonymous'}

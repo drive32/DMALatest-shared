@@ -1,86 +1,65 @@
-import React, { useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import React, { createContext, useEffect, useState } from 'react';
 import { getSupabaseClient } from '../lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const supabase = getSupabaseClient();
-  
-    const initializeSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-  
-        if (error) {
-          console.error('Error fetching session:', error);
-          return;
-        }
-  
-        if (session?.user) {
-          // Get user profile data
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('fullname')
-            .eq('id', session.user.id)
-            .single();
-  
-          if (profileError && profileError.code !== 'PGRST116') {
-            console.error('Error fetching profile data:', profileError);
-          }
-  
-          useAuth.setState({
-            user: {
-              id: session.user.id,
-              email: session.user.email || '',
-              fullName: profileData?.fullname || null,
-            },
-          });
-        } else {
-          useAuth.setState({ user: null });
-        }
-      } catch (error) {
-        console.error('Session initialization error:', error);
-        useAuth.setState({ user: null });
-      }
-    };
-  
-    // Initialize session on component mount
-    initializeSession();
-  
-    // Listen for auth state changes
-    const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        try {
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('fullname')
-            .eq('id', session.user.id)
-            .single();
-  
-          if (profileError && profileError.code !== 'PGRST116') throw profileError;
-  
-          useAuth.setState({
-            user: {
-              id: session.user.id,
-              email: session.user.email || '',
-              fullName: profileData?.fullname || null,
-            },
-          });
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-          useAuth.setState({ user: null });
-        }
-      } else {
-        useAuth.setState({ user: null });
-      }
-    });
-  
-    // Unsubscribe from auth state changes when the component unmounts
-    return () => {
-      if (data?.subscription) {
-        data.subscription.unsubscribe();
-      }
-    };
-  }, []);
-  
-  return <>{children}</>;
+interface User {
+  id: string;
+  email: string;
 }
+
+export const AuthContext = createContext<{
+  user: User | null;
+}>({ user: null });
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const supabase = await getSupabaseClient();
+        // Listen to auth state changes
+        const { data: subscription } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+            console.log(`Auth event: ${event}`);
+            if (session?.user) {
+              setUser({
+                id: session.user.id,
+                email: session.user.email,
+              });
+              AsyncStorage.setItem('supabase-session', JSON.stringify(session));
+            } else {
+
+              setUser(null);
+              AsyncStorage.removeItem('supabase-session');
+            }
+          }
+        );
+
+        // Check if a session exists in AsyncStorage
+        const storedSession = await AsyncStorage.getItem('supabase-session');
+        if (storedSession) {
+          const parsedSession = JSON.parse(storedSession);
+          await supabase.auth.setSession(parsedSession);
+          if (parsedSession.user) {
+            setUser(parsedSession.user);
+          }
+        }
+
+        setLoading(false);
+
+        return () => {
+          subscription?.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  return <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>;
+};
