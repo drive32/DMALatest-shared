@@ -70,11 +70,12 @@ export function AIDecisionPage() {
     <div className="min-h-screen bg-sand-50 dark:bg-sand-900">
       <Sidebar />
       
-      <main className="ml-64 p-8">
+      <main className="ml-32 p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto space-y-8"
+          style={decision ? '': { position:'absolute',width:'100%',top: '30%',left: '27%' }}
         >
           <DecisionInput onSubmit={handleDecisionSubmit} />
           

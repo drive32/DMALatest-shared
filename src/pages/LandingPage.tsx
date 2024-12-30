@@ -4,6 +4,7 @@ import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { Features } from '../components/Features';
 import { FloatingCTA } from '../components/FloatingCTA';
+import { HowItWorks } from '../components/community/HowItWorks'
 
 export function LandingPage() {
   return (
@@ -12,6 +13,7 @@ export function LandingPage() {
       <main>
         <Hero />
         <Features />
+        <HowItWorks/>
       </main>
       <FloatingCTA />
       <Footer />

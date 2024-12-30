@@ -19,7 +19,7 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 rounded-lg text-white bg-accent-500 hover:bg-accent-600 transition-colors font-sans font-medium;
+    @apply px-4 py-2 rounded-lg text-white bg-accent-900 hover:bg-accent-600 transition-colors font-sans font-medium;
   }
 
   .btn-secondary {
@@ -27,6 +27,14 @@
   }
 
   .input-primary {
-    @apply px-4 py-2 rounded-lg border border-gray-200 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none transition-colors;
+    @apply px-4 py-2 rounded-lg border border-gray-200 focus:border-accent-900 focus:ring-1 focus:ring-accent-900 outline-none transition-colors;
   }
+}
+
+.folder {
+  position: absolute;
+  width: 100%;
+  height: 30px;
+  background: #395caa;
+
 }

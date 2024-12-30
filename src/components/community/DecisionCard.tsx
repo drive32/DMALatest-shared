@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from "react-router-dom";
-import { MessageCircle, ThumbsUp, ThumbsDown, Share2, Clock, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { MessageCircle, ThumbsUp, ThumbsDown, Share2, Clock, MoreVertical, Edit2, Trash2, User, ArrowRight } from 'lucide-react';
 import { Menu } from '@headlessui/react';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../hooks/useAuth';
 import { useDecisions } from '../../hooks/useDecisions';
 import { toast } from 'sonner';
+import { formatDate } from '../../utils/dateUtils'
 
 interface Decision {
   id: string;
@@ -65,9 +66,9 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-secondary rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 overflow-hidden group"
+      className="block w-full bg-white rounded-2xl shadow-[0_0_50px_-12px_rgb(0,0,0,0.12)] p-8 hover:shadow-[0_0_50px_-6px_rgb(0,0,0,0.15)] transition-all duration-300 group"
     >
-      {decision.image_url && (
+       {decision.image_url && (
         <div className="aspect-video w-full overflow-hidden">
           <img
             src={decision.image_url}
@@ -76,22 +77,82 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
           />
         </div>
       )}
-
-      <div className="p-6">
-        <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-accent-50 flex items-center justify-center">
-          {decision.profiles?.avatar ? (
-            <img 
-              src={decision.profiles.avatar} 
-              alt={decision.profiles.fullname || 'User'} 
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          ) : (
-            <span className="text-lg font-medium text-accent-600">
-              {decision.profiles?.fullname?.[0]?.toUpperCase() || decision.profiles?.email?.[0]?.toUpperCase() || '?'}
-            </span>
-          )}
+          <Link 
+      to={`/decision/${decision.id}`}
+      className=""
+    >
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">{decision.title}</h2>
+          <p className="text-gray-600 text-lg leading-relaxed line-clamp-2">{decision.description}</p>
         </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-gray-500 gap-4">
+            <div className="flex items-center gap-1.5">
+              <User size={16} className="text-blue-500" />
+              <span className="font-medium text-gray-700">{decision.profiles?.fullname?.[0]?.toUpperCase() || decision.profiles?.email?.[0]?.toUpperCase() || '?'}</span>
+            </div>
+            {decision.decision_expired &&
+            <div className="flex items-center gap-1.5">
+              <Clock size={16} className="text-blue-500" />
+              {decision.decision_expired && new Date(decision.decision_expired) <= new Date() && (
+              <time className="font-medium text-gray-700">{formatDate(new Date(decision.decision_expired))}</time>)}
+            </div>}
+          </div>
+          
+          {/* <div className="flex items-center gap-2 text-blue-600 font-medium">
+            View Discussion
+            <ArrowRight size={18} className="transform group-hover:translate-x-1 transition-transform" />
+          </div> */}
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-sm">
+            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-medium">
+            {decision.votes?.up || 0} votes
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-blue-600 font-medium">
+            View Discussion
+            <ArrowRight size={18} className="transform group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </div>
+    </Link>
+      {/* {decision.image_url && (
+        <div className="aspect-video w-full overflow-hidden">
+          <img
+            src={decision.image_url}
+            alt=""
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+      )} */}
+
+      {/* <div className="p-6">
+        <Link to={`/decision/${decision.id}`}>
+          <h2 className="text-lg font-display font-bold text-primary mb-2 capitalize">
+            {decision.title}
+          </h2>
+        </Link>
+
+        <p className="text-gray-600 mb-4 line-clamp-3">
+          {decision.description}
+        </p>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-accent-50 flex items-center justify-center">
+            {decision.profiles?.avatar ? (
+              <img 
+                src={decision.profiles.avatar} 
+                alt={decision.profiles.fullname || 'User'} 
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <span className="text-lg font-medium text-accent-600">
+                {decision.profiles?.fullname?.[0]?.toUpperCase() || decision.profiles?.email?.[0]?.toUpperCase() || '?'}
+              </span>
+            )}
+          </div>
 
           <div className="flex-1">
             <h3 className="font-medium text-primary">
@@ -137,35 +198,24 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
               </Menu.Items>
             </Menu>
           )}
-        </div>
+        </div> */}
 
-      
-        <Link to={`/decision/${decision.id}`}>
-        <h2 className="text-lg font-display font-bold text-primary mb-2">
-          {decision.title}
-        </h2>
-      </Link>
-
-        <p className="text-gray-600 mb-4 line-clamp-3">
-          {decision.description}
-        </p>
-
-        <div className="flex flex-wrap gap-2 mb-4">
+        {/* <div className="flex flex-wrap gap-2 mb-4">
           {decision.category && (
             <span className="px-3 py-1 rounded-full text-sm bg-accent-50 text-accent-600">
               {decision.category}
             </span>
           )}
-        </div>
-        <div className="flex flex-wrap gap-2 mb-4">
+        </div> */}
+        {/* <div className="flex flex-wrap gap-2 mb-4">
           {decision.decision_expired && new Date(decision.decision_expired) <= new Date() && (
             <span className="text-red-500 font-bold ml-4">Poll Completed</span>
           )}
-        </div>
+        </div> */}
 
         
 
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           <button
             onClick={
               decision.decision_expired && new Date(decision.decision_expired) <= new Date()
@@ -207,10 +257,10 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
             Share
           </button>
           
-        </div>
+        </div> */}
 
 
-      </div>
+      {/* </div> */}
     </motion.div>
   );
 }

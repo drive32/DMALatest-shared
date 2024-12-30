@@ -10,7 +10,7 @@ export function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { isCollapsed, toggleCollapse } = useSidebarStore();
+  const { isCollapsed, toggleCollapse, removeCollapse } = useSidebarStore();
 
   const handleSignOut = async () => {
     console.log("step 1 logout");
@@ -44,9 +44,11 @@ export function Sidebar() {
       animate={{ 
         width: isCollapsed ? '5rem' : '16rem',
       }}
+      onMouseEnter={()=>toggleCollapse()}
+      onMouseLeave={()=>removeCollapse()}
       className="bg-secondary h-screen fixed left-0 top-0 border-r border-gray-200 shadow-lg z-50"
     >
-      <button
+      {/* <button
         onClick={toggleCollapse}
         className="absolute -right-3 top-6 bg-accent-500 text-white p-1 rounded-full shadow-lg hover:bg-accent-600 transition-colors"
       >
@@ -55,9 +57,7 @@ export function Sidebar() {
         ) : (
           <ChevronLeft className="w-4 h-4" />
         )}
-      </button>
-
-      {/* Profile Section */}
+      </button> */}
       <div className={`p-4 border-b border-gray-200 ${isCollapsed ? 'items-center' : ''}`}>
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -110,6 +110,7 @@ export function Sidebar() {
           <p className="text-xs mt-1 opacity-90">Get access to advanced features</p>
         </div>
       </div>}
+      {/* Profile Section */}
     </motion.div>
   );
 }

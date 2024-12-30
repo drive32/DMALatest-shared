@@ -119,7 +119,7 @@ export function Header() {
                   <div className="flex items-center gap-4">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
-                      onClick={() => setShowSignIn(true)}
+                      onClick={() => navigate('/signin')}
                       className="text-gray-600 hover:text-accent-600 transition-colors font-medium"
                     >
                       Sign in

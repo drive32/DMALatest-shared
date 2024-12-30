@@ -22,6 +22,7 @@ import {
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 import { formatDistanceToNow } from 'date-fns';
+import { useSidebarStore } from '@/store/sidebarStore';
 
 // Register ChartJS components
 ChartJS.register(
@@ -42,6 +43,8 @@ export function Dashboard() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('week');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const { isCollapsed } = useSidebarStore();
+
 
   useEffect(() => {
     const handleUserChange = async () => {
@@ -102,7 +105,7 @@ export function Dashboard() {
     <div className="min-h-screen bg-secondary">
       <Sidebar />
       
-      <main className="ml-64 p-8">
+      <main className={`transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-64'} p-8`}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             {/* Profile Card */}

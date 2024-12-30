@@ -7,6 +7,8 @@ import {DecisionView} from './pages/DecisionView';
 import { AIDecisionPage } from './pages/AIDecisionPage';
 import { Profile } from './pages/Profile';
 import { ResetPassword } from './pages/ResetPassword';
+import { SignIn } from './pages/Signin';
+import { SignUp } from './pages/Sigup';
 
 export function Routes() {
   return (
@@ -18,6 +20,8 @@ export function Routes() {
       <Route path="/resetPassword" element={<ResetPassword />} />
       <Route path="/ai-decision" element={<AIDecisionPage />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
     </RouterRoutes>
   );
 }
