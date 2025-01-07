@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from "react-router-dom";
-import { MessageCircle, ThumbsUp, ThumbsDown, Share2, Clock, MoreVertical, Edit2, Trash2, User, ArrowRight } from 'lucide-react';
-import { Menu } from '@headlessui/react';
-import { formatDistanceToNow } from 'date-fns';
+import {  Clock,  User, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDecisions } from '../../hooks/useDecisions';
 import { toast } from 'sonner';
@@ -78,7 +76,7 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
         </div>
       )}
           <Link 
-      to={`/decision/${decision.id}`}
+      to={`/decision/${decision.id}/${decision.user_id}`}
       className=""
     >
       <div className="space-y-6">

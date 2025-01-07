@@ -37,10 +37,10 @@ export function HowItWorks() {
             transition={{ delay: index * 0.2 }}
             className="bg-secondary rounded-xl p-6 text-center border border-gray-100"
           >
-            <div className="w-16 h-16 rounded-full bg-accent-50 flex items-center justify-center mx-auto mb-4">
-              <step.icon className="w-8 h-8 text-accent-600" />
+            <div className=" w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center transform rotate-1 hover:rotate-6 transition-transform rounded-full flex items-center justify-center mx-auto mb-4">
+              <step.icon className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-lg font-display font-bold text-primary mb-2">
+            <h3 className="text-lg font-display font-bold text-primary mb-2 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
               {step.title}
             </h3>
             <p className="text-gray-600">

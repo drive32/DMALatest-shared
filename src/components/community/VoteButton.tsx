@@ -6,14 +6,16 @@ interface VoteButtonProps {
     onClick: () => void;
     type: 'up' | 'down';
     isSelected: boolean;  // Add selected state
+    disabled:boolean;
   }
 
-export function VoteButton({ count, onClick, type, isSelected }: VoteButtonProps) {
+export function VoteButton({ count, onClick, type, isSelected,disabled }: VoteButtonProps) {
   const isYes = type === 'up';
   
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={`
         group flex items-center gap-3 px-8 py-3 rounded-xl
         transform transition-all duration-300

@@ -3,7 +3,10 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
+import { getSupabaseClient } from '../lib/supabase';
+
 import "./Signin.css";
+
 
 interface SignInForm {
     email: string;
@@ -13,7 +16,7 @@ export function SignUp() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const { signIn } = useAuth();
+    const { signIn,refreshSession } = useAuth();
 
     const {
         register,
@@ -25,6 +28,58 @@ export function SignUp() {
             password: "",
         },
     });
+
+    useEffect(() => {
+
+        const handleAuth = async () => {
+            const supabase = await getSupabaseClient();
+
+            // Extract token from URL
+           // Get the current URL
+            // Get the URL hash
+            const hash = window.location.hash;
+
+            // Parse the hash into an object
+            const params = new URLSearchParams(hash.substring(1)); // Remove the `#`
+
+            // Extract the access token
+            const accessToken = params.get("access_token");
+            const refreshToken = params.get("refresh_token");
+      
+            if (!accessToken) {
+              console.error("Access token not found in URL");
+              return;
+            }
+      
+            // Set the session with the access token
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken || "",
+            });
+      
+            if (error) {
+              console.error("Error setting session:", error);
+              return;
+            }
+      
+            console.log("Session set successfully:", data);
+      
+            // Fetch user data
+            const { data: user, error: userError } = await supabase.auth.getUser();
+      
+            if (userError) {
+              console.error("Error fetching user data:", userError);
+              return;
+            }
+            refreshSession();
+            // Redirect to dashboard
+            navigate("/dashboard");
+          };
+      
+          handleAuth();
+      
+      }, [navigate]);
+    
 
     const onSubmit = async (data: SignInForm) => {
         setIsLoading(true);
@@ -63,45 +118,49 @@ export function SignUp() {
         }
     };
 
+    const handleSignIn = async (provider: any) => {
+        const supabase = await getSupabaseClient();
+
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+              redirectTo: `${window.location.origin}/signup`,
+            },
+          });
+          if (error) {
+            console.error('Error signing in:', error.message);
+          } else {
+            console.log('Redirecting to OAuth provider...');
+          }
+        } catch (error) {
+            console.error('An unknown error occurred:', error);
+    
+        }
+      };
+      
+
     return (
         <>
-            <div className="sign-container">
-                <div className="sign-container--left">
-                    <div className="sign-container--left">
-                        <Link to="/" className="flex items-center">
-                            <motion.span
-                                className="text-2xl font-display font-bold text-accent-600"
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            >
-                                Decikar.ai
-                            </motion.span>
-                        </Link>
-                        {/* <div className="sign-wordmark">
-                        <img
-                            src="/sign-in/assets/images/wordmarks/wordmark-green.svg"
-                            alt="writer logo"
-                            width="129"
-                            height="43"
-                        />
-                    </div> */}
-                        <div className="sign-description mb-4">
-                            <h1 id="org-name-holder" className="sign-description--title">
-                                Sign up to your account
-                            </h1>
-                        </div>
-                        <div className="sign-art hidden sm:block">
-                            <img
-                                src='/login-image.jpg'
-                                alt="writer character"
-                                width="323"
-                                height="400"
-                            />
-                        </div>
-                    </div>
-                </div>
+            <div className="sign-container" style={{background:'url(/bg.jpg) no-repeat',backgroundSize:'cover'}}>
                 <div className="sign-container--right signup-container--right">
                     <div className="box box-sign shadow-md transform transition-all bg-white rounded-3xl shadow-[0_0_50px_-12px_rgb(0,0,0,0.12)] p-6 inset-0 bg-gradient-to-r from-blue-50 to-purple-50">
+                        <div className=" sign-form--row ">
+                            <Link to="/" className="block text-center mb-1">
+                                <motion.span
+                                    className="text-2xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+                                    whileHover={{ scale: 1.05 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                >
+                                    Decikar.ai
+                                </motion.span>
+                            </Link>
+                            <div className="sign-description mb-4 text-center">
+                                <h5 id="org-name-holder" className="sign-description--title">
+                                    Sign in to your account
+                                </h5>
+                            </div>
+                        </div>
                         <form onSubmit={handleSubmit(onSubmit)} id="sign-form" className="sign-form">
                             <div className="sign-form--row">
                                 <label htmlFor="email" className="sign-form--label">
@@ -149,11 +208,11 @@ export function SignUp() {
                                     <p className="sign-form--error-message">{error}</p>
                                 </div>
                             </div>
-                            <div className="sign-form--row main-btn">
-                                <div className="sign-in-btn">
+                            <div className="sign-form--row main-btn ">
+                                <div className="sign-in-btn w-full">
                                     {
                                         isLoading ? (
-                                            <button className="btn btn-blue" id="sign-in-button" disabled={isLoading}>
+                                            <button className="btn-primary inline-flex items-center justify-center px-6 py-2 text-md shadow-lg hover:shadow-xl w-full" id="sign-in-button" disabled={isLoading}>
                                                 <div className="spin" style={{ display: 'block' }}>
                                                     <div className="bounce1"></div>
                                                     <div className="bounce2"></div>
@@ -162,7 +221,7 @@ export function SignUp() {
                                                 <span className="holder" style={{ opacity: '0' }}>Sign up</span>
                                             </button>
                                         ) : (
-                                            <button className="btn btn-blue" id="sign-in-button">
+                                            <button className="btn-primary inline-flex items-center justify-center px-6 py-2 text-md shadow-lg hover:shadow-xl w-full" id="sign-in-button">
                                                 <div className="spin">
                                                     <div className="bounce1"></div>
                                                     <div className="bounce2"></div>
@@ -174,10 +233,9 @@ export function SignUp() {
                                     }
                                 </div>
                             </div>
-                            <div
-                                id="identity-separator"
-                                className="sign-form--row main-separator"
-                            >
+                            
+                        </form>
+                        <div id="identity-separator" className="sign-form--row main-separator">
                                 <div className="or">
                                     <span>or</span>
                                 </div>
@@ -186,7 +244,7 @@ export function SignUp() {
                                 className="sign-form--row secondary-btn"
                                 id="additional-identity"
                             >
-                                <button
+                                <button onClick={() => handleSignIn('google')}
                                     className="sign-form--internal-image-button"
                                     id="google-identity-button"
                                 >
@@ -207,7 +265,6 @@ export function SignUp() {
                                     Sign in
                                 </Link>
                             </div>
-                        </form>
                     </div>
                 </div>
             </div>

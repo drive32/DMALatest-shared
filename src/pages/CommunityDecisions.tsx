@@ -16,7 +16,6 @@ import { NewDecisionCard } from '../components/community/NewDecisionCard';
 import { Link } from 'react-router-dom';
 
 
-
 interface Tag {
   id: string;
   name: string;
@@ -143,7 +142,7 @@ export function CommunityDecisions() {
             <div className="flex items-center justify-center gap-3 mb-3">
               <Link to="/" className="flex items-center">
                 <motion.span
-                  className="text-2xl font-display font-bold text-accent-600"
+                  className="text-2xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
@@ -269,8 +268,17 @@ export function CommunityDecisions() {
                   <div className="flex items-center gap-2 mb-3">
                     <div className="relative">
                       <div className="w-12 h-12 rounded-full  flex items-center justify-center">
-                        <img src="https://blbfmoddnuoxsezajhwy.supabase.co/storage/v1/object/public/decisions/decisions/0.22878275138933013.PNG" alt="" className='w-full h-full rounded-full border-1' />
-                        {/* <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> */}
+                      {user?.avatar ? (
+                            <img
+                              src={user?.avatar}
+                              alt="Profile Preview"
+                              className="w-full h-full rounded-full border-1"
+                            />
+                          ) : (
+                            <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> 
+                          )}
+                       {/* <img src="https://blbfmoddnuoxsezajhwy.supabase.co/storage/v1/object/public/decisions/decisions/0.22878275138933013.PNG" alt="" className='w-full h-full rounded-full border-1' />
+                         <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> */}
                       </div>
                     </div>
                     <div className="min-w-0 flex-1 mt-4">
@@ -281,15 +289,15 @@ export function CommunityDecisions() {
                   </div>
                   <button className="btn-primary w-full cursor-not-allowed mb-4">Profile</button>
                   <div className='mb-4'>
-                    <p className="text-gray-600 mb-4 line-clamp-3">Lorem ipsum dolor sit amet consectetur adipisicing elit. A mollitia fugiat cum, iusto provident, hic quis, repellat fuga veniam ex et maiores debitis accusamus! Laborum tempore sed iusto quidem quo!</p>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{user?.bio}</p>
                   </div>
                   <div className='mb-4'>
                     <h6 className="font-display mb-2 uppercase font-semibold">Location</h6>
-                    <p className="text-gray-600 mb-4 line-clamp-3">Lorem ipsum dolor sit</p>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{user?.location}</p>
                   </div>
                   <div className='mb-4'>
                     <h6 className="font-display mb-2 uppercase font-semibold">Joined</h6>
-                    <p className="text-gray-600 mb-4 line-clamp-3">Jan, 24, 2013</p>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{user?.createdAt}</p>
                   </div>
                 </div>
                 {/* <div className='flex mb-4'>
@@ -298,47 +306,7 @@ export function CommunityDecisions() {
                 <h5 className="text-lg font-display mb-2 uppercase">Challenges 🤗</h5> */}
               </div>
             </motion.div>
-            <motion.div
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                style={{ height: 'fit-content' }}
-                className="mt-5 p-4 bg-secondary rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-100 overflow-hidden group border-solid relative mt-1"
-              >
-                <div className='mb-2 flex'>
-                  <h6 className="font-display mb-2 mr-2 text-1xl">More from</h6>
-                  <h6 className="font-display text-blue-600 mb-4 line-clamp-3 text-1xl">Lorem ipsum dolor </h6>
-                </div>
-                <div className='mb-4'>
-                  <p className="text-gray-600 mb-1 line-clamp-3">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
-                  <div className='flex'>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>webdev</span>
-                    </p>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>javascript</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className='mb-4'>
-                  <p className="text-gray-600 mb-1 line-clamp-3">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
-                  <div className='flex'>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>webdev</span>
-                    </p>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>javascript</span>
-                    </p>
-                  </div>
-                </div>
-
-            </motion.div>
+            
             </div>
           </div>
 

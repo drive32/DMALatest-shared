@@ -38,8 +38,10 @@ export function Features() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="p-6 rounded-xl bg-secondary hover:shadow-lg transition-shadow border border-gray-100"
             >
-              <feature.icon className="w-12 h-12 text-accent-500 mb-4" />
-              <h3 className="text-xl font-display font-bold text-primary mb-2">
+              <div className='w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center transform rotate-1 hover:rotate-6 transition-transform mb-3'>
+                <feature.icon className="w-8 h-8 text-white" strokeWidth={1.5}/>
+              </div>
+              <h3 className="text-xl font-semibold mb-3 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
                 {feature.title}
               </h3>
               <p className="text-gray-600">

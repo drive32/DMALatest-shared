@@ -65,6 +65,10 @@ export function Header() {
       console.error('Error signing out:', error);
     }
   };
+  const handleSignIn = async () => {
+    navigate("/signin");
+  };
+
 
   const showAuthButtons = !user && location.pathname !== '/decision';
 
@@ -88,7 +92,7 @@ export function Header() {
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <motion.span 
-                className="text-2xl font-display font-bold text-accent-600"
+                className="text-2xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
@@ -126,7 +130,7 @@ export function Header() {
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
-                      onClick={() => setShowSignUp(true)}
+                      onClick={() => handleSignIn()}
                       className="btn-primary px-6"
                     >
                       Get Started

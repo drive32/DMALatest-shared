@@ -19,6 +19,7 @@ interface DecisionsStore {
   DesicionData:Decision[];
   fetchCommunityDecisions: () => Promise<void>;
   fetchDecisionById: (id:any) => Promise<void>;
+  fetchDecisionByUserId: (id:any) => Promise<void>;
   fetchDecisionCountByGender: (id:any) => Promise<{ male: { up: number; down: number }; female: { up: number; down: number } }>;
 
   fetchDecisions: () => Promise<void>;
@@ -136,6 +137,61 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
       }));
       
       set({ DesicionData: decisionsWithVotes });
+    } catch (error) {
+      console.error('Error fetching community decisions:', error);
+      set({ error: 'Failed to fetch community decisions' });
+      toast.error('Unable to load community decisions. Please try again later.');
+      return [];
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchDecisionByUserId: async (userId:any): Promise<void> => {
+    set({ isLoading: true, error: null });
+    const supabase = await getSupabaseClient();
+
+    try {
+      // First get all decisions with related data
+      const { data, error } = await supabase
+        .from('decisions')
+        .select(`
+          *,
+          profiles:profiles!user_id (
+            fullname,
+            email,
+            avatar
+          ),
+          votes:decision_votes!left (
+            vote_type,
+            user_id
+          ),
+          comments:decision_comments (id)
+        `)
+        .eq('user_id', userId); // Add this to filter by the specific id
+
+      if (error) throw error;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Process and transform the data
+      const decisionsWithVotes = (data || []).map(d => ({
+        ...d,
+        votes: {
+          up: d.votes?.filter(v => v.vote_type === 'up')?.length || 0,
+          down: d.votes?.filter(v => v.vote_type === 'down')?.length || 0,
+          userVote: user ? d.votes?.find(v => v.user_id === user.id)?.vote_type || null : null,
+        },
+        comments: d.comments || [],
+        profiles: {
+          fullname: d.profiles?.fullname || null,
+          email: d.profiles?.email || null,
+          avatar: d.profiles?.avatar || null
+
+        }
+      }));
+      
+      set({ communityDecisions: decisionsWithVotes });
     } catch (error) {
       console.error('Error fetching community decisions:', error);
       set({ error: 'Failed to fetch community decisions' });
@@ -414,7 +470,7 @@ export const useDecisions = create<DecisionsStore>((set, get) => ({
 
       // Optimistically update UI
       set(state => ({
-        communityDecisions: state.communityDecisions.map(d => {
+        DesicionData: state.DesicionData.map(d => {
           if (d.id === decisionId) {
             const votes = { ...d.votes };
             if (existingVote) {

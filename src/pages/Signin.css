@@ -177,7 +177,7 @@
 }
 
 .form-input {
-    background: #eff0f2;
+    /* background: #eff0f2; */
     border: 1px solid #eff0f2;
     border-radius: 4px;
     box-sizing: border-box;
@@ -258,7 +258,7 @@ button:disabled,button:disabled:hover {
 
 .btn span {
     color: #000;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 600;
     line-height: 19px
 }
@@ -727,10 +727,13 @@ button:disabled,button:disabled:hover {
         padding: 15px;
     }
     .sign-container-signin {
-        padding-top: 65px;
+        /* padding-top: 65px; */
+    }
+    .signup-container--right {
+        height: 470px !important;
     }
     .sign-container--right {
-        height: 500px;
+        height: 520px;
         position: relative;
         width: unset;
     }
@@ -751,20 +754,24 @@ button:disabled,button:disabled:hover {
 
 @media (min-width:801px){
     .sign-container {
-        display: grid;
+        /* display: grid;
         grid-template-columns: auto auto;
         margin: 0 auto;
         padding-bottom: 80px;
         padding-top: 158px;
-        width: 728px
+        width: 728px */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
     }
     .sign-container--right {
-        height: 460px;
+        /* height: 460px; */
         position: relative;
-        width: 383px
+        width: 480px
     }
     .signup-container--right {
-        height: 420px;
+        height: 480px;
     }
 
     .sign-container--left {
@@ -802,7 +809,7 @@ button:disabled,button:disabled:hover {
 
 .sign-description--title {
     color: #000;
-    font-size: 25px;
+    font-size: 15px;
     font-weight: 600;
     line-height: 110%;
     margin-bottom: 18px;
@@ -918,7 +925,7 @@ button:disabled,button:disabled:hover {
 }
 
 .sign-form--row.forgot-password {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     line-height: 24px;
     margin-bottom: 14px;
@@ -936,12 +943,12 @@ button:disabled,button:disabled:hover {
 
 .sign-form--label {
     display: block;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 1.3px;
+    font-size: 14px;
+    /* font-weight: 500; */
+    letter-spacing: 0.5px;
     line-height: 15px;
     margin-bottom: 5px;
-    text-transform: uppercase
+    text-transform: capitalize
 }
 
 .sign-form--input {

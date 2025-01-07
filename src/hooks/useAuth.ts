@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { getSupabaseClient } from '../lib/supabase';
 import { getAuthErrorMessage } from '../utils/errorHandling';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { format } from 'date-fns';
 
 
 const forgotRedirectionUrl = import.meta.env.VITE_FORGOT_PASSWORD_REDIRECT_URL;
@@ -11,6 +12,10 @@ interface User {
   id: string;
   email: string;
   fullName: string | null;
+  createdAt:string,
+  bio:string,
+  location:string,
+  avatar:string
 }
 
 interface AuthState {
@@ -74,7 +79,7 @@ export const useAuth = create<AuthState>((set,get) => ({
         const refreshedUser = refreshedSession.user;
         const { data: profileData } = await supabase
           .from('profiles')
-          .select('fullname')
+          .select('*')
           .eq('id', refreshedUser.id)
           .single();
   
@@ -82,6 +87,10 @@ export const useAuth = create<AuthState>((set,get) => ({
           id: refreshedUser.id,
           email: refreshedUser.email || '',
           fullName: profileData?.fullname || null,
+          bio:profileData?.bio || '',
+          location:profileData?.country || '',
+          createdAt:format(new Date(profileData?.created_at), 'dd MMMM yyyy'),
+          avatar:profileData?.avatar || ''
         };
   
         set({
@@ -199,7 +208,7 @@ export const useAuth = create<AuthState>((set,get) => ({
  // Get profile data
     const { data: profileData } = await supabase
                               .from('profiles')
-                              .select('fullname')
+                              .select('*')
                               .eq('id', data.user.id)
                               .single();
     
@@ -208,10 +217,15 @@ export const useAuth = create<AuthState>((set,get) => ({
       await AsyncStorage.setItem('supabase-session', JSON.stringify(data.session));
     }
 
+
     const user = {
       id: data.user.id,
       email: data.user.email || '',
-      fullName: profileData?.fullname || null
+      fullName: profileData?.fullname || null,
+      bio:profileData?.bio || '',
+      location:profileData?.country || '',
+      createdAt:format(new Date(profileData?.created_at), 'dd MMMM yyyy'),
+      avatar:profileData?.avatar || ''
     };
 
     set({ 

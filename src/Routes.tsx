@@ -9,6 +9,7 @@ import { Profile } from './pages/Profile';
 import { ResetPassword } from './pages/ResetPassword';
 import { SignIn } from './pages/Signin';
 import { SignUp } from './pages/Sigup';
+import { ForgotPassword } from './pages/ForgotPassword';
 
 export function Routes() {
   return (
@@ -16,12 +17,13 @@ export function Routes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/community" element={<CommunityDecisions />} />
-      <Route path="/decision/:id" element={<DecisionView />} />
+      <Route path="/decision/:id/:userId" element={<DecisionView />} />
       <Route path="/resetPassword" element={<ResetPassword />} />
       <Route path="/ai-decision" element={<AIDecisionPage />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/forgotPassword" element={<ForgotPassword />} />
     </RouterRoutes>
   );
 }

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from '../components/decision/Sidebar';
 import {
   MessageCircle, ThumbsUp, ThumbsDown, Share2, Search,
-  TrendingUp, Filter, Bell, Image, Hash, Loader2, Sparkles
+  TrendingUp, Filter, Bell, Image, Hash, Loader2, Sparkles,UserCircle
 } from 'lucide-react';
 import { HowItWorks } from '../components/community/HowItWorks';
 import { DecisionFeedView } from '../components/community/DecisionFeedView';
@@ -13,6 +13,7 @@ import { FeaturedDecisions } from '../components/community/FeaturedDecisions';
 import { useSidebarStore } from '../store/sidebarStore';
 import { useDecisions } from '../hooks/useDecisions';
 import { useAuth } from '../hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { BackButton } from '@/components/common/BackButton';
 
 interface Tag {
@@ -49,7 +50,8 @@ interface Decision {
 }
 
 export function DecisionView() {
-  const { id } = useParams();
+  const { id,userId } = useParams();
+
   const [isNewDecisionModalOpen, setIsNewDecisionModalOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,24 +59,29 @@ export function DecisionView() {
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
   const [editingDecision, setEditingDecision] = useState<Decision | null>(null);
   const {
+    communityDecisions,
     DesicionData,
     fetchDecisionById,
+    fetchDecisionByUserId,
     loadMoreDecisions,
     isLoading,
     hasMore,
     voteDecision
   } = useDecisions();
   const { user } = useAuth();
+  const {profile,fetchProfile} = useProfile();
   const { isCollapsed } = useSidebarStore();
   const [loadingMore, setLoadingMore] = useState(false);
 
   const categories = [
     'Career', 'Finance', 'Education', 'Lifestyle', 'Technology', 'Health'
   ];
-
   useEffect(() => {
     fetchDecisionById(id);
-  }, []);
+    fetchDecisionByUserId(userId);
+    fetchProfile(userId);
+
+  }, [id,userId]);
 
   // Infinite scroll handler
   const handleScroll = useCallback(() => {
@@ -142,7 +149,7 @@ export function DecisionView() {
             <div className="flex items-center justify-center gap-3 mb-3">
               <Link to="/" className="flex items-center">
                 <motion.span
-                  className="text-2xl font-display font-bold text-accent-600"
+                  className="text-2xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
@@ -157,24 +164,7 @@ export function DecisionView() {
           <BackButton />
           <div className="grid grid-cols-6 gap-4">
             <div className="col-start-1 col-span-4 space-y-6">
-              {/* Hero Section */}
-              {/* <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative rounded-2xl bg-gradient-to-r from-accent-500 to-accent-600 p-12 mb-12 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522071820081-009f0129c71c')] bg-cover bg-center opacity-10" />
-            <div className="relative z-10">
-              <h1 className="text-4xl font-display font-bold text-white mb-4">
-                Join the Conversation!
-              </h1>
-              <p className="text-xl text-white/90 mb-8 max-w-2xl">
-                Share your decisions, gather insights, and connect with our community.
-                Your next great decision starts with a conversation.
-              </p>
-             
-            </div>
-          </motion.div> */}
+            
 
 
               {/* Featured Decisions */}
@@ -206,29 +196,38 @@ export function DecisionView() {
                   <div className="">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-full  flex items-center justify-center">
-                          <img src="https://blbfmoddnuoxsezajhwy.supabase.co/storage/v1/object/public/decisions/decisions/0.22878275138933013.PNG" alt="" className='w-full h-full rounded-full border-1' />
-                          {/* <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> */}
-                        </div>
+                      <div className="w-12 h-12 rounded-full  flex items-center justify-center">
+                      {user?.avatar ? (
+                            <img
+                              src={profile?.avatar}
+                              alt="Profile Preview"
+                              className="w-full h-full rounded-full border-1"
+                            />
+                          ) : (
+                            <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> 
+                          )}
+                       {/* <img src="https://blbfmoddnuoxsezajhwy.supabase.co/storage/v1/object/public/decisions/decisions/0.22878275138933013.PNG" alt="" className='w-full h-full rounded-full border-1' />
+                         <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> */}
+                      </div>
                       </div>
                       <div className="min-w-0 flex-1 mt-4">
-                        <h2 className="font-medium text-primary truncate">
-                          {user?.fullName || user?.email || 'Guest User'}
-                        </h2>
-                      </div>
+                      <h2 className="font-medium text-primary truncate">
+                        {profile?.fullName || 'Guest User'}
+                      </h2>
                     </div>
-                    <button className="btn-primary w-full cursor-not-allowed mb-4">Profile</button>
-                    <div className='mb-4'>
-                      <p className="text-gray-600 mb-4 line-clamp-3">Lorem ipsum dolor sit amet consectetur adipisicing elit. A mollitia fugiat cum, iusto provident, hic quis, repellat fuga veniam ex et maiores debitis accusamus! Laborum tempore sed iusto quidem quo!</p>
-                    </div>
-                    <div className='mb-4'>
-                      <h6 className="font-display mb-2 uppercase font-semibold">Location</h6>
-                      <p className="text-gray-600 mb-4 line-clamp-3">Lorem ipsum dolor sit</p>
-                    </div>
-                    <div className='mb-4'>
-                      <h6 className="font-display mb-2 uppercase font-semibold">Joined</h6>
-                      <p className="text-gray-600 mb-4 line-clamp-3">Jan, 24, 2013</p>
-                    </div>
+                  </div>
+                  <button className="btn-primary w-full cursor-not-allowed mb-4">Profile</button>
+                  <div className='mb-4'>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{profile?.bio}</p>
+                  </div>
+                  <div className='mb-4'>
+                    <h6 className="font-display mb-2 uppercase font-semibold">Location</h6>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{profile?.country}</p>
+                  </div>
+                  <div className='mb-4'>
+                    <h6 className="font-display mb-2 uppercase font-semibold">Joined</h6>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{profile?.createdAt}</p>
+                  </div>
                   </div>
                   {/* <div className='flex mb-4'>
                     <p className="text-gray-600 mb-4 line-clamp-3">👋 What's happening this week</p>
@@ -246,35 +245,18 @@ export function DecisionView() {
               >
                 <div className='mb-2 flex'>
                   <h6 className="font-display mb-2 mr-2 text-1xl">More from</h6>
-                  <h6 className="font-display text-blue-600 mb-4 line-clamp-3 text-1xl">Lorem ipsum dolor </h6>
+                  <h6 className="font-display text-blue-600 mb-4 line-clamp-3 text-1xl">{profile?.fullName}</h6>
                 </div>
+                {communityDecisions.map((decision, index) => (
+                   <Link 
+                        to={`/decision/${decision.id}/${userId}`}
+                        className=""
+                      >
                 <div className='mb-4'>
-                  <p className="text-gray-600 mb-1 line-clamp-3">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
-                  <div className='flex'>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>webdev</span>
-                    </p>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>javascript</span>
-                    </p>
-                  </div>
+                  <p className="text-gray-600 mb-1 line-clamp-3">{decision?.title}</p>
                 </div>
-
-                <div className='mb-4'>
-                  <p className="text-gray-600 mb-1 line-clamp-3">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
-                  <div className='flex'>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>webdev</span>
-                    </p>
-                    <p className='mr-2'>
-                      <span className='text-sm text-gray-500'>
-                        <span className='text-sm text-gray-400'>#</span>javascript</span>
-                    </p>
-                  </div>
-                </div>
+                </Link>
+                ))}
 
               </motion.div>
             </div>

@@ -21,11 +21,11 @@ export function Hero() {
             className="relative z-10"
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold leading-tight">
-              <span className="text-accent-600">
+              <span className="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
                 Make Better Decisions
               </span>
               <br />
-              <span className="text-primary">
+              <span className="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
                 with Community Insights
               </span>
             </h1>
@@ -50,10 +50,13 @@ export function Hero() {
                 onClick={() => navigate('/ai-decision')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="btn-secondary inline-flex items-center justify-center px-8 py-3 text-lg shadow-lg hover:shadow-xl"
+                className="btn-secondary inline-flex items-center justify-center px-8 py-3 text-lg shadow-lg hover:shadow-xl bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
               >
                 Try AI Decision Maker
-                <Brain className="ml-2 w-5 h-5" />
+                <div className="bg-gradient-to-r from-purple-600 to-blue-500 flex transform rounded-full ml-2">
+                <Brain className=" w-5 h-5 text-white" />
+                </div>
+                
               </motion.button>
             </div>
           </motion.div>

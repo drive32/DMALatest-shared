@@ -36,7 +36,7 @@ export function DecisionAnalytics({ decision }:any) {
         <div className="grid grid-cols-2 gap-8">
           <VoteStats
             label="Yes Votes"
-            count={1}
+            count={decision.votes?.up || 0}
             percentage={100}
             gradientFrom="from-emerald-500"
             gradientTo="to-emerald-400"
@@ -44,7 +44,7 @@ export function DecisionAnalytics({ decision }:any) {
           />
           <VoteStats
             label="No Votes"
-            count={1}
+            count={decision.votes?.down || 0}
             percentage={50}
             gradientFrom="from-rose-500"
             gradientTo="to-rose-400"
@@ -55,12 +55,12 @@ export function DecisionAnalytics({ decision }:any) {
         <div className="grid grid-cols-2 gap-6">
           <StatCard
             icon={Users}
-            value={5}
+            value={(decision.votes?.up || 0) + (decision.votes?.down || 0)}
             label="Total Votes"
           />
           <StatCard
             icon={TrendingUp}
-            value={Math.abs(5)}
+            value={(decision.votes?.up || 0) - (decision.votes?.down || 0)}
             label="Vote Difference"
             bgColor="bg-purple-50"
             iconColor="text-purple-600"

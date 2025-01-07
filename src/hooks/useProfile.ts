@@ -3,6 +3,8 @@ import { getSupabaseClient } from '../lib/supabase';
 import { toast } from 'sonner';
 import { uploadFile } from '../utils/api';
 import { STORAGE_BUCKETS } from '../utils/constants';
+import { format } from 'date-fns';
+
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -18,7 +20,8 @@ interface Profile {
   phoneNumber: string | null;
   address: string | null;
   bio: string | null;
-  avatar: string | null;
+  avatar: string | '';
+  createdAt:string | '';
 }
 
 interface ProfileStore {
@@ -26,7 +29,7 @@ interface ProfileStore {
   isLoading: boolean;
   isUpdating: boolean;
   error: string | null;
-  fetchProfile: (userId: string) => Promise<void>;
+  fetchProfile: (userId: any) => Promise<void>;
   updateProfile: (userId: string, updates: Partial<Profile>, avatarFile?: File | null) => Promise<void>;
 }
 
@@ -36,7 +39,7 @@ export const useProfile = create<ProfileStore>((set,get) => ({
   isUpdating: false,
   error: null,
 
-  fetchProfile: async (userId: string) => {
+  fetchProfile: async (userId: any) => {
     set({ isLoading: true, error: null });
     const supabase = await getSupabaseClient();
     try {
@@ -61,7 +64,9 @@ export const useProfile = create<ProfileStore>((set,get) => ({
             phoneNumber: data.phone_number,
             address: data.address,
             bio: data.bio,
-            avatar: data.avatar
+            avatar: data.avatar,
+            createdAt:format(new Date(data?.created_at), 'dd MMMM yyyy'),
+            
           }
         }));
 

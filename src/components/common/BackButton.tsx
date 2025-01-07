@@ -7,7 +7,7 @@ export function BackButton() {
 
   return (
     <div 
-      onClick={() => navigate('/')}
+      onClick={() => navigate('/community')}
       className="inline-flex items-center gap-3 cursor-pointer group mb-8"
     >
       <div className="relative">
