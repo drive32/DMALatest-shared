@@ -89,7 +89,7 @@ export function Sidebar() {
             title={isCollapsed ? item.label : undefined}
           >
             <item.icon className="w-5 h-5" />
-            {!isCollapsed && <span>{item.label}</span>}
+            {!isCollapsed && <span className={'truncate'}>{item.label}</span>}
           </Link>
         ))}
         
