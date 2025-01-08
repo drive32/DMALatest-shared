@@ -78,7 +78,7 @@ export function DecisionFeedView({ decision, onVote, onEdit }: Props) {
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">{decision.title}</h2>
-            <p className="text-gray-600 text-lg leading-relaxed line-clamp-2">{decision.description} Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed beatae nisi ex, explicabo, eius voluptas dolores rem enim natus eaque labore sequi recusandae possimus vero culpa esse, velit aspernatur molestias!</p>
+            <p className="text-gray-600 text-lg leading-relaxed line-clamp-2">{decision.description} </p>
           </div>
 
           <div className="flex items-center justify-between">

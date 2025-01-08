@@ -91,12 +91,10 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
               <User size={16} className="text-blue-500" />
               <span className="font-medium text-gray-700">{decision.profiles?.fullname?.[0]?.toUpperCase() || decision.profiles?.email?.[0]?.toUpperCase() || '?'}</span>
             </div>
-            {decision.decision_expired &&
             <div className="flex items-center gap-1.5">
               <Clock size={16} className="text-blue-500" />
-              {decision.decision_expired && new Date(decision.decision_expired) <= new Date() && (
-              <time className="font-medium text-gray-700">{formatDate(new Date(decision.decision_expired))}</time>)}
-            </div>}
+              <time className="font-medium text-gray-700">{formatDate(new Date(decision.created_at))}</time>
+            </div>
           </div>
           
           {/* <div className="flex items-center gap-2 text-blue-600 font-medium">

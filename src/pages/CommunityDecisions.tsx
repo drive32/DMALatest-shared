@@ -208,14 +208,7 @@ export function CommunityDecisions() {
                     ))}
                   </select>
 
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as 'recent' | 'popular')}
-                    className="input-primary"
-                  >
-                    <option value="recent">Most Recent</option>
-                    <option value="popular">Most Popular</option>
-                  </select>
+
                 </div>
               </div>
 
@@ -224,21 +217,7 @@ export function CommunityDecisions() {
 
               {/* Decision Grid */}
               <div className="grid grid-cols-6 gap-4">
-                {/* <motion.div
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              style={{ height: 'fit-content' }}
-              className="col-start-1 col-span-1 bg-secondary rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-100 overflow-hidden group border-solid"
-            >
-              <div className="p-6">
-                <h5 className="text-lg font-display mb-4 uppercase">DEV Community is a community of 2,590,046 amazing developers</h5>
-                <p className="text-gray-600 mb-4 line-clamp-3">We're a place where coders share, stay up-to-date and grow their careers.</p>
-                <button className="btn-secondary w-full cursor-not-allowed mb-3">Create account</button>
-                <button className="btn-white w-full cursor-not-allowed border-0">Login</button>
-              </div>
-            </motion.div> */}
+              
                 <div className="col-start-1 col-span-6 space-y-6">
                   <AnimatePresence mode="popLayout">
                     {filteredDecisions.map((decision) => (
