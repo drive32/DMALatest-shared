@@ -212,6 +212,13 @@ export function CommunityDecisions() {
                 </div>
               </div>
 
+              <div className="flex items-center gap-3 mb-8">
+                <TrendingUp size={28} className="text-purple-500" />
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
+                  Trending Posts
+                </h2>
+              </div>
+
               {/* Featured Decisions */}
               <FeaturedDecisions decisions={communityDecisions.filter(d => d.featured)} />
 
