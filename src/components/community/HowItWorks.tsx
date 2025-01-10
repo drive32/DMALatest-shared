@@ -24,7 +24,7 @@ export function HowItWorks() {
   return (
     <div className='max-w-7xl mx-auto'>
     <section className="mb-12">
-      <h2 className="text-2xl font-display font-bold text-primary mb-8 text-center">
+      <h2 className="text-xl font-display font-bold text-primary mb-8 text-center">
         How It Works
       </h2>
 

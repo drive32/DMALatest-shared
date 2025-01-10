@@ -92,9 +92,8 @@ export function Header() {
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <motion.span 
-                className="text-2xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="text-xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+              
               >
                 Decikar.ai
               </motion.span>

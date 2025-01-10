@@ -149,7 +149,7 @@ export function DecisionView() {
             <div className="flex items-center justify-center gap-3 mb-3">
               <Link to="/" className="flex items-center">
                 <motion.span
-                  className="text-2xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+                  className="text-xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
@@ -191,11 +191,13 @@ export function DecisionView() {
                 style={{ height: 'fit-content' }}
                 className="bg-secondary rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-100 overflow-hidden group border-solid relative mt-1"
               >
-                <div className='absolute folder'></div>
+                <div className='absolute folder bg-gradient-to-r from-purple-600 to-blue-500 px-3 pt-2 text-white bold font-display'>
+                  Profile
+                </div>
                 <div className="p-4">
-                  <div className="">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="relative">
+                  <div className="mt-6">
+                    <div className="flex items-center gap-2 mb-3 justify-center flex-col">
+                      <div className="mt-3">
                       <div className="w-12 h-12 rounded-full  flex items-center justify-center">
                       {user?.avatar ? (
                             <img
@@ -204,19 +206,19 @@ export function DecisionView() {
                               className="w-full h-full rounded-full border-1"
                             />
                           ) : (
-                            <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> 
+                            <UserCircle className="w-full h-full text-accent-600 rounded border-1" style={{color:'#9333ea'}} /> 
                           )}
                        {/* <img src="https://blbfmoddnuoxsezajhwy.supabase.co/storage/v1/object/public/decisions/decisions/0.22878275138933013.PNG" alt="" className='w-full h-full rounded-full border-1' />
                          <UserCircle className="w-full h-full text-accent-600 rounded border-1" /> */}
                       </div>
                       </div>
-                      <div className="min-w-0 flex-1 mt-4">
+                      <div className="min-w-0 flex-1 ">
                       <h2 className="font-medium text-primary truncate">
                         {profile?.fullName || 'Guest User'}
                       </h2>
                     </div>
                   </div>
-                  <button className="btn-primary w-full cursor-not-allowed mb-4">Profile</button>
+                  {/* <button className="btn-primary w-full cursor-not-allowed mb-4">Profile</button> */}
                   <div className='mb-4'>
                     <p className="text-gray-600 mb-4 line-clamp-3">{profile?.bio}</p>
                   </div>

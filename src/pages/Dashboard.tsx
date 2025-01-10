@@ -44,7 +44,12 @@ export function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { isCollapsed } = useSidebarStore();
-
+  const createGradient = (ctx: CanvasRenderingContext2D) => {
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, '#0b45a3'); // Starting color
+    gradient.addColorStop(1, '#86c5f6'); // Ending color
+    return gradient;
+  };
 
   useEffect(() => {
     const handleUserChange = async () => {
@@ -72,14 +77,14 @@ export function Dashboard() {
       {
         label: 'Upvotes',
         data: decisions.slice(0, 7).map(d => d.votes?.up || 0),
-        borderColor: '#4CAF50',
+        borderColor: '#9333ea',
         backgroundColor: 'rgba(76, 175, 80, 0.1)',
         tension: 0.3
       },
       {
         label: 'Downvotes',
         data: decisions.slice(0, 7).map(d => d.votes?.down || 0),
-        borderColor: '#FF5252',
+        borderColor: '#3b82f6',
         backgroundColor: 'rgba(255, 82, 82, 0.1)',
         tension: 0.3
       }
@@ -92,11 +97,11 @@ export function Dashboard() {
       data: Array.from(new Set(decisions.map(d => d.category || 'Other')))
         .map(category => decisions.filter(d => (d.category || 'Other') === category).length),
       backgroundColor: [
-        '#4CAF50',
-        '#66BB6A',
-        '#81C784',
-        '#A5D6A7',
-        '#C8E6C9'
+        '#063e96',
+        '#496a9f',
+        '#9333ea',
+        '#315ea7',
+        '#4168a7'
       ]
     }]
   };
@@ -124,10 +129,10 @@ export function Dashboard() {
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <UserCircle className="w-10 h-10 text-accent-600" />
+                      <UserCircle className="w-10 h-10 text-accent-600" style={{color:'#9333ea'}} />
                     )}
                   </div>
-                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-accent-500 rounded-full border-2 border-secondary" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-accent-500 rounded-full border-2 border-secondary bg-gradient-to-r from-purple-600 to-blue-500" />
                 </div>
                 <div>
                   <h2 className="text-xl font-display font-bold text-primary">
@@ -161,7 +166,7 @@ export function Dashboard() {
                   <TrendingUp className="w-5 h-5" />
                   <span className="text-sm font-medium">Total Decisions</span>
                 </div>
-                <p className="mt-2 text-2xl font-display font-bold text-primary" data-testid="total-decisions">
+                <p className="mt-2 text-xl font-display font-bold text-primary" data-testid="total-decisions">
                   {decisions.length}
                 </p>
               </div>
@@ -171,7 +176,7 @@ export function Dashboard() {
                   <MessageCircle className="w-5 h-5" />
                   <span className="text-sm font-medium">Total Comments</span>
                 </div>
-                <p className="mt-2 text-2xl font-display font-bold text-primary" data-testid="total-comments">
+                <p className="mt-2 text-xl font-display font-bold text-primary" data-testid="total-comments">
                   {decisions.reduce((acc, d) => acc + (d.comments?.length || 0), 0)}
                 </p>
               </div>
@@ -181,7 +186,7 @@ export function Dashboard() {
                   <Users className="w-5 h-5" />
                   <span className="text-sm font-medium">Total Participants</span>
                 </div>
-                <p className="mt-2 text-2xl font-display font-bold text-primary" data-testid="total-participants">
+                <p className="mt-2 text-xl font-display font-bold text-primary" data-testid="total-participants">
                   {decisions.reduce((acc, d) => acc + (d.collaborators?.length || 0), 0)}
                 </p>
               </div>
@@ -230,6 +235,7 @@ export function Dashboard() {
                     responsive: true,
                     maintainAspectRatio: false
                   }}
+                  
                 />
               </div>
             </motion.div>

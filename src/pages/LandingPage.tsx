@@ -15,7 +15,6 @@ export function LandingPage() {
         <Features />
         <HowItWorks/>
       </main>
-      <FloatingCTA />
       <Footer />
     </div>
   );

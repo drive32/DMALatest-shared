@@ -35,7 +35,18 @@
 .folder {
   position: absolute;
   width: 100%;
-  height: 30px;
-  background: #395caa;
-
+  height: 40px;
+  /* background: #395caa; */
 }
+
+.w-80{
+  width: 20rem; 
+}
+
+/* .text-accent-600{
+  color:#9333ea!important
+} */
+/* .text-blue-600{
+  
+} */
+

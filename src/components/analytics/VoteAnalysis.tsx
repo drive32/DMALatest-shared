@@ -18,7 +18,7 @@ export function VoteAnalysis({ question }: VoteAnalysisProps) {
     <Card className="mt-8">
       <div className="flex items-center gap-3 mb-8">
         <Lightbulb size={24} className="text-yellow-500" />
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-xl font-bold">
           <GradientText from="from-yellow-600" to="to-orange-600">
             AI-Powered Analysis
           </GradientText>

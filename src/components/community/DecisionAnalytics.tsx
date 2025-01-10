@@ -25,7 +25,7 @@ export function DecisionAnalytics({ decision }:any) {
     <Card>
       <div className="flex items-center gap-3 mb-8">
         <BarChart3 size={24} className="text-purple-500" />
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-xl font-bold">
           <GradientText from="from-purple-600" to="to-pink-600">
             Vote Analytics
           </GradientText>

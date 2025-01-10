@@ -62,7 +62,7 @@ export function ForgotPassword() {
                         <div className=" sign-form--row ">
                             <Link to="/" className="block text-center mb-1">
                                 <motion.span
-                                    className="text-2xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+                                    className="text-xl font-display font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
                                     whileHover={{ scale: 1.05 }}
                                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                                 >

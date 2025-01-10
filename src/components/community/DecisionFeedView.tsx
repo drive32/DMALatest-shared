@@ -77,7 +77,7 @@ export function DecisionFeedView({ decision, onVote, onEdit }: Props) {
       <div className="w-full bg-white rounded-2xl shadow-[0_0_50px_-12px_rgb(0,0,0,0.12)] p-8 hover:shadow-[0_0_50px_-6px_rgb(0,0,0,0.15)] transition-all duration-300">
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">{decision.title}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">{decision.title}</h2>
             <p className="text-gray-600 text-lg leading-relaxed line-clamp-2">{decision.description} </p>
           </div>
 

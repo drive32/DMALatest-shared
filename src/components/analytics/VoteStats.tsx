@@ -22,7 +22,7 @@ export function VoteStats({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-lg font-medium text-gray-700">{label}</span>
-        <span className={`text-2xl font-bold ${textColor}`}>{count}</span>
+        <span className={`text-xl font-bold ${textColor}`}>{count}</span>
       </div>
       <ProgressBar 
         value={percentage} 

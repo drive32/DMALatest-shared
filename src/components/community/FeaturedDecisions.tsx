@@ -43,7 +43,7 @@ export function FeaturedDecisions({ decisions }: Props) {
     <section className="mb-12">
       <div className="flex items-center gap-3 mb-6">
         <TrendingUp className="w-6 h-6 text-accent-600" />
-        <h2 className="text-2xl font-display font-bold text-primary">
+        <h2 className="text-xl font-display font-bold text-primary">
           Featured Decisions
         </h2>
       </div>

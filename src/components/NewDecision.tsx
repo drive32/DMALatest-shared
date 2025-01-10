@@ -43,7 +43,7 @@ export function NewDecision() {
         <div className="p-2 bg-purple-50 rounded-lg">
           <Brain className="w-6 h-6 text-purple-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">New Decision</h2>
+        <h2 className="text-xl font-bold text-gray-900">New Decision</h2>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">

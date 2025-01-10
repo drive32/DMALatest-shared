@@ -57,10 +57,10 @@ export function Profile() {
 
             <div className="flex items-center gap-4 mb-8">
               <div className="p-3 rounded-xl bg-accent-50">
-                <UserCircle className="w-8 h-8 text-accent-600" />
+                <UserCircle className="w-8 h-8 text-accent-600" style={{color:'#9333ea'}} />
               </div>
               <div>
-                <h1 className="text-2xl font-display font-bold text-primary">
+                <h1 className="text-xl font-display font-bold text-primary">
                   Profile Settings
                 </h1>
                 <p className="text-gray-600">

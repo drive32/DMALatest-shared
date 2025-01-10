@@ -17,6 +17,8 @@ export function NewDecisionCard({ categories, editingDecision }: Props) {
     const [description, setDescription] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [image, setImage] = useState<File | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
+
     const [isLoading, setIsLoading] = useState(false);
     const [decisionExpired, setDecisionExpired] = useState('');
     const [calculatedDateTime, setCalculatedDateTime] = useState<string | null>(null); // New datetime
@@ -79,6 +81,9 @@ export function NewDecisionCard({ categories, editingDecision }: Props) {
         const file = e.target.files?.[0];
         if (file) {
             setImage(file);
+            const previewUrl = URL.createObjectURL(file);
+            setPreview(previewUrl);
+
         }
     };
 
@@ -165,9 +170,9 @@ export function NewDecisionCard({ categories, editingDecision }: Props) {
                                     {image ? (
                                         <div className="relative">
                                             <img
-                                                src={image}
+                                                src={preview}
                                                 alt="Preview"
-                                                className="max-h-48 rounded-lg"
+                                                className="w-20 h-20 rounded-lg"
                                             />
                                             <button
                                                 type="button"
@@ -179,7 +184,6 @@ export function NewDecisionCard({ categories, editingDecision }: Props) {
                                         </div>
                                     ) : (
                                         <>
-                                            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
                                             <div className="flex text-sm text-gray-600">
                                                 <label className="relative cursor-pointer rounded-md font-medium text-accent-600 hover:text-accent-500">
                                                     <span>Upload a file</span>
@@ -190,11 +194,8 @@ export function NewDecisionCard({ categories, editingDecision }: Props) {
                                                         onChange={handleImageUpload}
                                                     />
                                                 </label>
-                                                <p className="pl-1">or drag and drop</p>
                                             </div>
-                                            <p className="text-xs text-gray-500">
-                                                PNG, JPG, GIF up to 10MB
-                                            </p>
+                                            
                                         </>
                                     )}
                                 </div>

@@ -37,7 +37,7 @@ export function Hero() {
             
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <motion.button
-                onClick={() => navigate('/community')}
+                onClick={() => navigate('/signin')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="btn-primary inline-flex items-center justify-center px-8 py-3 text-lg shadow-lg hover:shadow-xl"
@@ -46,18 +46,7 @@ export function Hero() {
                 <ArrowRight className="ml-2 w-5 h-5" />
               </motion.button>
 
-              <motion.button
-                onClick={() => navigate('/ai-decision')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="btn-secondary inline-flex items-center justify-center px-8 py-3 text-lg shadow-lg hover:shadow-xl bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
-              >
-                Try AI Decision Maker
-                <div className="bg-gradient-to-r from-purple-600 to-blue-500 flex transform rounded-full ml-2">
-                <Brain className=" w-5 h-5 text-white" />
-                </div>
-                
-              </motion.button>
+             
             </div>
           </motion.div>
 
@@ -69,8 +58,6 @@ export function Hero() {
             className="relative z-10 lg:justify-self-end"
           >
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="relative max-w-lg mx-auto"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-accent-100/30 to-accent-200/30 rounded-3xl transform -rotate-2" />

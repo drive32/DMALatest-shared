@@ -81,8 +81,8 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">{decision.title}</h2>
-          <p className="text-gray-600 text-lg leading-relaxed line-clamp-2">{decision.description}</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">{decision.title}</h2>
+          <p className="text-gray-600 text-lg leading-relaxed line-clamp-2 ">{decision.description}</p>
         </div>
 
         <div className="flex items-center justify-between">
@@ -104,13 +104,13 @@ export function DecisionCard({ decision, onVote, onEdit }: Props) {
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-sm">
-            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-medium">
+            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-medium bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
             {decision.votes?.up || 0} votes
             </span>
           </div>
-          <div className="flex items-center gap-2 text-blue-600 font-medium">
+          <div className="flex items-center gap-2 text-blue-600 font-medium bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
             View Discussion
-            <ArrowRight size={18} className="transform group-hover:translate-x-1 transition-transform" />
+            <ArrowRight size={18} className="transform group-hover:translate-x-1 transition-transform text-blue-600" />
           </div>
         </div>
       </div>

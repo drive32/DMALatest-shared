@@ -70,7 +70,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
         <Dialog.Overlay className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
 
         <div className="inline-block w-full max-w-md my-8 p-8 text-left align-middle bg-secondary rounded-2xl shadow-xl transform transition-all">
-          <Dialog.Title as="h3" className="text-2xl font-display font-bold text-primary mb-6">
+          <Dialog.Title as="h3" className="text-xl font-display font-bold text-primary mb-6">
             Welcome back
           </Dialog.Title>
 

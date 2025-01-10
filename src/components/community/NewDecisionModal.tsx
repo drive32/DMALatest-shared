@@ -97,7 +97,7 @@ export function NewDecisionModal({ isOpen, onClose, categories, editingDecision 
 
             <div className="inline-block w-full max-w-2xl my-8 p-6 text-left align-middle bg-secondary rounded-2xl shadow-xl transform transition-all">
               <div className="flex items-center justify-between mb-6">
-                <Dialog.Title className="text-2xl font-display font-bold text-primary">
+                <Dialog.Title className="text-xl font-display font-bold text-primary">
                   {editingDecision ? 'Edit Decision' : 'Share Your Decision'}
                 </Dialog.Title>
                 <button
@@ -168,7 +168,7 @@ export function NewDecisionModal({ isOpen, onClose, categories, editingDecision 
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Image (optional)
                   </label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg w-80">
                     <div className="space-y-1 text-center">
                       {image ? (
                         <div className="relative">

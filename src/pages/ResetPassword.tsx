@@ -95,7 +95,7 @@ export function ResetPassword() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white dark:bg-sand-800 rounded-xl shadow-lg p-3"
           >
-            <h3 className="text-2xl font-display font-bold text-primary mb-6">
+            <h3 className="text-xl font-display font-bold text-primary mb-6">
               Reset Password
             </h3>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

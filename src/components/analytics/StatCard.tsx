@@ -22,7 +22,7 @@ export function StatCard({
     <div className={`flex items-center gap-3 p-4 rounded-xl ${bgColor}`}>
       <Icon className={iconColor} />
       <div>
-        <div className={`text-2xl font-bold ${textColor}`}>{value}</div>
+        <div className={`text-xl font-bold ${textColor}`}>{value}</div>
         <div className={`text-sm font-medium ${iconColor}`}>{label}</div>
       </div>
     </div>
